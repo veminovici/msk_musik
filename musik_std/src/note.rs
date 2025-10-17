@@ -1,6 +1,7 @@
 //! Note implementation for musical notes.
 
 use crate::semitone::Semitone;
+use std::ops::{Add, Sub};
 
 /// A musical note represented by its semitone offset from C.
 ///
@@ -135,6 +136,63 @@ impl From<Note> for Semitone {
     }
 }
 
+impl Add<Semitone> for Note {
+    type Output = Note;
+
+    /// Adds a `Semitone` to a `Note`, returning a new `Note`.
+    ///
+    /// This operation transposes the note upward by the given number of semitones.
+    /// The result wraps around the 12-semitone chromatic scale if it exceeds the
+    /// maximum semitone value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::{Note, Semitone};
+    ///
+    /// let c = Note::new(0);        // C
+    /// let major_third = Semitone::new(4);
+    /// let e = c + major_third;     // E
+    /// assert_eq!(e.semitone(), 4);
+    ///
+    /// let g = Note::new(7);        // G
+    /// let perfect_fifth = Semitone::new(7);
+    /// let d = g + perfect_fifth;   // D (next octave: 7 + 7 = 14, wraps to 2)
+    /// assert_eq!(d.semitone(), 14);
+    /// ```
+    fn add(self, rhs: Semitone) -> Self::Output {
+        Note::new(self.0.saturating_add(u8::from(rhs)))
+    }
+}
+
+impl Sub<Semitone> for Note {
+    type Output = Note;
+
+    /// Subtracts a `Semitone` from a `Note`, returning a new `Note`.
+    ///
+    /// This operation transposes the note downward by the given number of semitones.
+    /// The result uses saturating subtraction to prevent underflow.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::{Note, Semitone};
+    ///
+    /// let e = Note::new(4);        // E
+    /// let major_third = Semitone::new(4);
+    /// let c = e - major_third;     // C
+    /// assert_eq!(c.semitone(), 0);
+    ///
+    /// let c = Note::new(0);        // C
+    /// let octave = Semitone::new(12);
+    /// let low_c = c - octave;      // Saturates at 0
+    /// assert_eq!(low_c.semitone(), 0);
+    /// ```
+    fn sub(self, rhs: Semitone) -> Self::Output {
+        Note::new(self.0.saturating_sub(u8::from(rhs)))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -258,5 +316,106 @@ mod tests {
         assert_eq!(e.semitone(), 4); // Major third
         assert_eq!(g.semitone(), 7); // Perfect fifth
         assert_eq!(b.semitone(), 11); // Major seventh
+    }
+
+    #[test]
+    fn test_note_add_semitone() {
+        let c = Note::new(0);
+        let major_third = Semitone::new(4);
+        let e = c + major_third;
+        assert_eq!(e.semitone(), 4);
+
+        let g = Note::new(7);
+        let perfect_fifth = Semitone::new(7);
+        let d_next_octave = g + perfect_fifth;
+        assert_eq!(d_next_octave.semitone(), 14);
+
+        // Test with large values (saturation)
+        let high_note = Note::new(250);
+        let small_interval = Semitone::new(10);
+        let result = high_note + small_interval;
+        assert_eq!(result.semitone(), 255); // Should saturate at u8::MAX
+    }
+
+    #[test]
+    fn test_note_sub_semitone() {
+        let e = Note::new(4);
+        let major_third = Semitone::new(4);
+        let c = e - major_third;
+        assert_eq!(c.semitone(), 0);
+
+        let g = Note::new(7);
+        let minor_third = Semitone::new(3);
+        let e_flat = g - minor_third;
+        assert_eq!(e_flat.semitone(), 4);
+
+        // Test saturation at zero
+        let c = Note::new(0);
+        let octave = Semitone::new(12);
+        let result = c - octave;
+        assert_eq!(result.semitone(), 0); // Should saturate at 0
+    }
+
+    #[test]
+    fn test_note_add_sub_musical_intervals() {
+        let c = Note::new(0);
+
+        // Major scale intervals from C
+        let major_second = Semitone::new(2);
+        let major_third = Semitone::new(4);
+        let perfect_fourth = Semitone::new(5);
+        let perfect_fifth = Semitone::new(7);
+        let major_sixth = Semitone::new(9);
+        let major_seventh = Semitone::new(11);
+        let octave = Semitone::new(12);
+
+        assert_eq!((c + major_second).semitone(), 2); // D
+        assert_eq!((c + major_third).semitone(), 4); // E
+        assert_eq!((c + perfect_fourth).semitone(), 5); // F
+        assert_eq!((c + perfect_fifth).semitone(), 7); // G
+        assert_eq!((c + major_sixth).semitone(), 9); // A
+        assert_eq!((c + major_seventh).semitone(), 11); // B
+        assert_eq!((c + octave).semitone(), 12); // C next octave
+
+        // Test subtraction brings us back
+        let high_c = c + octave;
+        assert_eq!((high_c - octave).semitone(), 0); // Back to C
+        assert_eq!((high_c - major_seventh).semitone(), 1); // C# when subtracting major 7th from high C
+    }
+
+    #[test]
+    fn test_note_add_sub_chromatic_operations() {
+        let notes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        let semitone_step = Semitone::new(1);
+
+        // Test adding a semitone to each note
+        for &note_value in &notes {
+            let note = Note::new(note_value);
+            let next_note = note + semitone_step;
+            assert_eq!(next_note.semitone(), note_value + 1);
+        }
+
+        // Test subtracting a semitone from each note (except 0)
+        for &note_value in &notes[1..] {
+            let note = Note::new(note_value);
+            let prev_note = note - semitone_step;
+            assert_eq!(prev_note.semitone(), note_value - 1);
+        }
+    }
+
+    #[test]
+    fn test_note_add_sub_identity_operations() {
+        let notes = [0, 5, 12, 24, 48, 60, 72, 127];
+        let zero_semitones = Semitone::new(0);
+
+        for &note_value in &notes {
+            let note = Note::new(note_value);
+
+            // Adding zero should return the same note
+            assert_eq!((note + zero_semitones).semitone(), note_value);
+
+            // Subtracting zero should return the same note
+            assert_eq!((note - zero_semitones).semitone(), note_value);
+        }
     }
 }
