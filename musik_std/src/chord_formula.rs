@@ -166,11 +166,7 @@ impl ChordFormula {
             return false;
         }
 
-        let expected = match alteration {
-            DegreeAlteration::None => 1,  // Natural
-            DegreeAlteration::Flat => 2,  // Flat
-            DegreeAlteration::Sharp => 3, // Sharp
-        };
+        let expected = alteration.to_u8() as u32;
 
         let shift = (degree - 1) * 2;
         let actual_value = (self.0 >> shift) & 0b11;
@@ -222,11 +218,9 @@ impl ChordFormula {
         let value = (self.0 >> shift) & 0b11;
 
         match value {
-            0 => None,                          // Not in chord
-            1 => Some(DegreeAlteration::None),  // Natural
-            2 => Some(DegreeAlteration::Flat),  // Flat
-            3 => Some(DegreeAlteration::Sharp), // Sharp
-            _ => None,                          // Should never happen
+            0 => None,                                                         // Not in chord
+            v if v >= 1 && v <= 3 => Some(DegreeAlteration::from_u8(v as u8)), // Natural, Flat, or Sharp
+            _ => None, // Should never happen
         }
     }
 

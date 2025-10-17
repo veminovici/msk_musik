@@ -136,6 +136,55 @@ impl DegreeAlteration {
             DegreeAlteration::Flat => DegreeAlteration::Sharp,
         }
     }
+
+    /// Convert a u8 value to a `DegreeAlteration`.
+    ///
+    /// - Value `1` converts to `None` (natural)
+    /// - Value `2` converts to `Flat`
+    /// - Value `3` converts to `Sharp`
+    /// - Any other value panics
+    ///
+    /// # Examples
+    /// ```
+    /// use musik_std::DegreeAlteration;
+    ///
+    /// assert_eq!(DegreeAlteration::from_u8(1), DegreeAlteration::None);
+    /// assert_eq!(DegreeAlteration::from_u8(2), DegreeAlteration::Flat);
+    /// assert_eq!(DegreeAlteration::from_u8(3), DegreeAlteration::Sharp);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the value is not 1, 2, or 3.
+    pub const fn from_u8(value: u8) -> Self {
+        match value {
+            1 => DegreeAlteration::None,
+            2 => DegreeAlteration::Flat,
+            3 => DegreeAlteration::Sharp,
+            _ => panic!("Invalid u8 value for DegreeAlteration"),
+        }
+    }
+
+    /// Convert this `DegreeAlteration` to a u8 value.
+    ///
+    /// - `None` converts to `1`
+    /// - `Flat` converts to `2`
+    /// - `Sharp` converts to `3`
+    ///
+    /// # Examples
+    /// ```
+    /// use musik_std::DegreeAlteration;
+    ///
+    /// assert_eq!(DegreeAlteration::None.to_u8(), 1);
+    /// assert_eq!(DegreeAlteration::Flat.to_u8(), 2);
+    /// assert_eq!(DegreeAlteration::Sharp.to_u8(), 3);
+    /// ```
+    pub const fn to_u8(&self) -> u8 {
+        match self {
+            DegreeAlteration::None => 1,
+            DegreeAlteration::Flat => 2,
+            DegreeAlteration::Sharp => 3,
+        }
+    }
 }
 
 impl fmt::Display for DegreeAlteration {
@@ -206,11 +255,7 @@ impl From<DegreeAlteration> for u8 {
     /// assert_eq!(u8::from(DegreeAlteration::Sharp), 3);
     /// ```
     fn from(alteration: DegreeAlteration) -> Self {
-        match alteration {
-            DegreeAlteration::None => 1,
-            DegreeAlteration::Flat => 2,
-            DegreeAlteration::Sharp => 3,
-        }
+        alteration.to_u8()
     }
 }
 
@@ -393,5 +438,40 @@ mod tests {
         assert_eq!(none_alt, none_alt_round_trip);
         assert_eq!(flat_alt, flat_alt_round_trip);
         assert_eq!(sharp_alt, sharp_alt_round_trip);
+    }
+
+    #[test]
+    fn test_const_from_to_u8_methods() {
+        // Test const from_u8 method
+        const NONE_ALT: DegreeAlteration = DegreeAlteration::from_u8(1);
+        const FLAT_ALT: DegreeAlteration = DegreeAlteration::from_u8(2);
+        const SHARP_ALT: DegreeAlteration = DegreeAlteration::from_u8(3);
+
+        assert_eq!(NONE_ALT, DegreeAlteration::None);
+        assert_eq!(FLAT_ALT, DegreeAlteration::Flat);
+        assert_eq!(SHARP_ALT, DegreeAlteration::Sharp);
+
+        // Test const to_u8 method
+        const NONE_VALUE: u8 = DegreeAlteration::None.to_u8();
+        const FLAT_VALUE: u8 = DegreeAlteration::Flat.to_u8();
+        const SHARP_VALUE: u8 = DegreeAlteration::Sharp.to_u8();
+
+        assert_eq!(NONE_VALUE, 1);
+        assert_eq!(FLAT_VALUE, 2);
+        assert_eq!(SHARP_VALUE, 3);
+
+        // Test round trip with const methods
+        assert_eq!(
+            DegreeAlteration::from_u8(DegreeAlteration::None.to_u8()),
+            DegreeAlteration::None
+        );
+        assert_eq!(
+            DegreeAlteration::from_u8(DegreeAlteration::Flat.to_u8()),
+            DegreeAlteration::Flat
+        );
+        assert_eq!(
+            DegreeAlteration::from_u8(DegreeAlteration::Sharp.to_u8()),
+            DegreeAlteration::Sharp
+        );
     }
 }
