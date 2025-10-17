@@ -4,15 +4,15 @@
 //! using bit flags, where each bit position indicates whether a semitone is
 //! present in the scale.
 
-use std::fmt;
 use crate::semitone::SEMITONES_IN_OCTAVE;
+use std::fmt;
 
 /// Represents a musical scale formula using bit flags.
 ///
 /// Each bit position corresponds to a semitone offset from the root note.
 /// A set bit (1) indicates that the semitone is present in the scale,
 /// while an unset bit (0) indicates it's not part of the scale.
-/// 
+///
 /// Supports two octaves (24 semitones) to accommodate extended harmony:
 ///
 /// **First Octave (bits 0-11):**
@@ -271,7 +271,7 @@ impl ScaleFormula {
     /// // Custom scale
     /// let custom = ScaleFormula::from_semitones(&[0, 1, 3, 6, 8]);
     /// assert_eq!(custom.note_count(), 5);
-    /// 
+    ///
     /// // Extended harmony with 9ths, 11ths, 13ths
     /// let extended = ScaleFormula::from_semitones(&[0, 2, 4, 5, 7, 9, 11, 14, 17, 21]);
     /// assert!(extended.contains_semitone(14)); // 9th
@@ -298,7 +298,7 @@ impl ScaleFormula {
     /// assert!(major.contains_semitone(0)); // Root
     /// assert!(major.contains_semitone(4)); // Major 3rd
     /// assert!(!major.contains_semitone(1)); // No minor 2nd
-    /// 
+    ///
     /// // Extended formulas support second octave
     /// let extended = ScaleFormula::major_extended();
     /// assert!(extended.contains_semitone(14)); // 9th
@@ -334,7 +334,7 @@ impl ScaleFormula {
     /// let major = ScaleFormula::major();
     /// let semitones = major.semitones();
     /// assert_eq!(semitones, vec![0, 2, 4, 5, 7, 9, 11]);
-    /// 
+    ///
     /// // Extended scales show notes in both octaves
     /// let extended = ScaleFormula::major_extended();
     /// let ext_semitones = extended.semitones();
@@ -359,7 +359,7 @@ impl ScaleFormula {
     /// let major = ScaleFormula::major();
     /// let bits = major.bits();
     /// assert_eq!(bits, 0b101010110101);
-    /// 
+    ///
     /// // Extended formulas can have bits in second octave
     /// let extended = ScaleFormula::major_extended();
     /// assert!(extended.bits() > 0xFFF); // Uses more than 12 bits
@@ -403,7 +403,7 @@ impl ScaleFormula {
     /// let major = ScaleFormula::major();
     /// let minor = ScaleFormula::minor();
     /// let combined = major.union(minor);
-    /// 
+    ///
     /// // Combined should have both major and minor thirds
     /// assert!(combined.contains_semitone(3)); // Minor 3rd
     /// assert!(combined.contains_semitone(4)); // Major 3rd
@@ -421,7 +421,7 @@ impl ScaleFormula {
     /// let major = ScaleFormula::major();
     /// let minor = ScaleFormula::minor();
     /// let common = major.intersection(minor);
-    /// 
+    ///
     /// // Common notes: 1, 2, 4, 5
     /// assert!(common.contains_semitone(0)); // Root
     /// assert!(common.contains_semitone(2)); // Major 2nd
@@ -433,7 +433,7 @@ impl ScaleFormula {
     }
 
     /// Complement of the scale formula (bitwise NOT, masked to first octave only).
-    /// 
+    ///
     /// This only considers the first 12 semitones to maintain traditional scale complement behavior.
     ///
     /// # Examples
@@ -442,7 +442,7 @@ impl ScaleFormula {
     ///
     /// let major = ScaleFormula::major();
     /// let complement = major.complement();
-    /// 
+    ///
     /// // Complement should contain all notes NOT in major scale
     /// assert!(!complement.contains_semitone(0)); // Root not in complement
     /// assert!(complement.contains_semitone(1)); // Minor 2nd in complement
@@ -460,13 +460,11 @@ impl fmt::Display for ScaleFormula {
 
         let semitones = self.semitones();
         let note_names = [
-            "1", "♭2", "2", "♭3", "3", "4", "♭5", "5", "♭6", "6", "♭7", "7"
+            "1", "♭2", "2", "♭3", "3", "4", "♭5", "5", "♭6", "6", "♭7", "7",
         ];
-        
-        let names: Vec<&str> = semitones.iter()
-            .map(|&s| note_names[s as usize])
-            .collect();
-        
+
+        let names: Vec<&str> = semitones.iter().map(|&s| note_names[s as usize]).collect();
+
         write!(f, "{}", names.join(", "))
     }
 }
@@ -536,25 +534,25 @@ mod tests {
     fn test_major_scale() {
         let major = ScaleFormula::major();
         let expected_semitones = vec![0, 2, 4, 5, 7, 9, 11];
-        
+
         assert_eq!(major.note_count(), 7);
         assert_eq!(major.semitones(), expected_semitones);
         assert!(major.has_root());
-        
+
         // Test specific intervals
-        assert!(major.contains_semitone(0));  // Root
-        assert!(major.contains_semitone(2));  // Major 2nd
-        assert!(major.contains_semitone(4));  // Major 3rd
-        assert!(major.contains_semitone(5));  // Perfect 4th
-        assert!(major.contains_semitone(7));  // Perfect 5th
-        assert!(major.contains_semitone(9));  // Major 6th
+        assert!(major.contains_semitone(0)); // Root
+        assert!(major.contains_semitone(2)); // Major 2nd
+        assert!(major.contains_semitone(4)); // Major 3rd
+        assert!(major.contains_semitone(5)); // Perfect 4th
+        assert!(major.contains_semitone(7)); // Perfect 5th
+        assert!(major.contains_semitone(9)); // Major 6th
         assert!(major.contains_semitone(11)); // Major 7th
-        
+
         // Test missing intervals
-        assert!(!major.contains_semitone(1));  // Minor 2nd
-        assert!(!major.contains_semitone(3));  // Minor 3rd
-        assert!(!major.contains_semitone(6));  // Tritone
-        assert!(!major.contains_semitone(8));  // Minor 6th
+        assert!(!major.contains_semitone(1)); // Minor 2nd
+        assert!(!major.contains_semitone(3)); // Minor 3rd
+        assert!(!major.contains_semitone(6)); // Tritone
+        assert!(!major.contains_semitone(8)); // Minor 6th
         assert!(!major.contains_semitone(10)); // Minor 7th
     }
 
@@ -562,23 +560,23 @@ mod tests {
     fn test_minor_scale() {
         let minor = ScaleFormula::minor();
         let expected_semitones = vec![0, 2, 3, 5, 7, 8, 10];
-        
+
         assert_eq!(minor.note_count(), 7);
         assert_eq!(minor.semitones(), expected_semitones);
         assert!(minor.has_root());
-        
+
         // Test specific intervals
-        assert!(minor.contains_semitone(0));  // Root
-        assert!(minor.contains_semitone(2));  // Major 2nd
-        assert!(minor.contains_semitone(3));  // Minor 3rd
-        assert!(minor.contains_semitone(5));  // Perfect 4th
-        assert!(minor.contains_semitone(7));  // Perfect 5th
-        assert!(minor.contains_semitone(8));  // Minor 6th
+        assert!(minor.contains_semitone(0)); // Root
+        assert!(minor.contains_semitone(2)); // Major 2nd
+        assert!(minor.contains_semitone(3)); // Minor 3rd
+        assert!(minor.contains_semitone(5)); // Perfect 4th
+        assert!(minor.contains_semitone(7)); // Perfect 5th
+        assert!(minor.contains_semitone(8)); // Minor 6th
         assert!(minor.contains_semitone(10)); // Minor 7th
-        
+
         // Test missing intervals
-        assert!(!minor.contains_semitone(4));  // Major 3rd
-        assert!(!minor.contains_semitone(9));  // Major 6th
+        assert!(!minor.contains_semitone(4)); // Major 3rd
+        assert!(!minor.contains_semitone(9)); // Major 6th
         assert!(!minor.contains_semitone(11)); // Major 7th
     }
 
@@ -587,7 +585,7 @@ mod tests {
         let pent_major = ScaleFormula::pentatonic_major();
         assert_eq!(pent_major.semitones(), vec![0, 2, 4, 7, 9]);
         assert_eq!(pent_major.note_count(), 5);
-        
+
         let pent_minor = ScaleFormula::pentatonic_minor();
         assert_eq!(pent_minor.semitones(), vec![0, 3, 5, 7, 10]);
         assert_eq!(pent_minor.note_count(), 5);
@@ -606,11 +604,11 @@ mod tests {
         let custom = ScaleFormula::from_semitones(&[0, 2, 4, 7, 9]);
         assert_eq!(custom.semitones(), vec![0, 2, 4, 7, 9]);
         assert_eq!(custom, ScaleFormula::pentatonic_major());
-        
+
         // Test with extended range semitones
         let with_extended = ScaleFormula::from_semitones(&[0, 2, 12, 15]);
         assert_eq!(with_extended.semitones(), vec![0, 2, 12, 15]);
-        
+
         // Test with out-of-range semitones (should be ignored)
         let with_invalid = ScaleFormula::from_semitones(&[0, 2, 2 * SEMITONES_IN_OCTAVE, 30]);
         assert_eq!(with_invalid.semitones(), vec![0, 2]);
@@ -620,34 +618,34 @@ mod tests {
     fn test_bitwise_operations() {
         let major = ScaleFormula::major();
         let minor = ScaleFormula::minor();
-        
+
         // Union
         let union = major | minor;
         assert!(union.contains_semitone(3)); // Minor 3rd from minor
         assert!(union.contains_semitone(4)); // Major 3rd from major
         assert!(union.contains_semitone(9)); // Major 6th from major
         assert!(union.contains_semitone(8)); // Minor 6th from minor
-        
+
         // Intersection
         let intersection = major & minor;
         let common_notes = intersection.semitones();
         assert_eq!(common_notes, vec![0, 2, 5, 7]); // 1, 2, 4, 5
-        
+
         // Complement
         let complement = !major;
         assert!(!complement.contains_semitone(0)); // Root not in complement
-        assert!(complement.contains_semitone(1));  // Minor 2nd in complement
-        assert!(complement.contains_semitone(3));  // Minor 3rd in complement
+        assert!(complement.contains_semitone(1)); // Minor 2nd in complement
+        assert!(complement.contains_semitone(3)); // Minor 3rd in complement
     }
 
     #[test]
     fn test_display() {
         let major = ScaleFormula::major();
         assert_eq!(format!("{}", major), "1, 2, 3, 4, 5, 6, 7");
-        
+
         let minor = ScaleFormula::minor();
         assert_eq!(format!("{}", minor), "1, 2, ♭3, 4, 5, ♭6, ♭7");
-        
+
         let empty = ScaleFormula::empty();
         assert_eq!(format!("{}", empty), "Empty");
     }
@@ -656,7 +654,7 @@ mod tests {
     fn test_binary_display() {
         let major = ScaleFormula::major();
         assert_eq!(format!("{:b}", major), "101010110101");
-        
+
         let empty = ScaleFormula::empty();
         assert_eq!(format!("{:b}", empty), "000000000000");
     }
@@ -666,35 +664,35 @@ mod tests {
         let major1 = ScaleFormula::major();
         let major2 = ScaleFormula::major();
         let minor = ScaleFormula::minor();
-        
+
         assert_eq!(major1, major2);
         assert_ne!(major1, minor);
-        
+
         // Test in hash collections
         use std::collections::HashSet;
         let mut set = HashSet::new();
         set.insert(major1);
         set.insert(major2); // Should not increase size
-        set.insert(minor);  // Should increase size
-        
+        set.insert(minor); // Should increase size
+
         assert_eq!(set.len(), 2);
     }
 
     #[test]
     fn test_contains_semitone_boundary() {
         let major = ScaleFormula::major();
-        
+
         // Valid semitones in first octave
         assert!(major.contains_semitone(0));
         assert!(!major.contains_semitone(1));
         assert!(major.contains_semitone(11));
-        
+
         // Valid semitones in extended range (but not in basic major scale)
-        assert!(!major.contains_semitone(SEMITONES_IN_OCTAVE));      // Octave (12)
-        assert!(!major.contains_semitone(SEMITONES_IN_OCTAVE + 3));  // Minor 3rd in second octave (15)
-        
+        assert!(!major.contains_semitone(SEMITONES_IN_OCTAVE)); // Octave (12)
+        assert!(!major.contains_semitone(SEMITONES_IN_OCTAVE + 3)); // Minor 3rd in second octave (15)
+
         // Invalid semitones (>= 24)
-        assert!(!major.contains_semitone(2 * SEMITONES_IN_OCTAVE));  // 24
+        assert!(!major.contains_semitone(2 * SEMITONES_IN_OCTAVE)); // 24
         assert!(!major.contains_semitone(255));
     }
 
@@ -704,15 +702,15 @@ mod tests {
         const MAJOR: ScaleFormula = ScaleFormula::major();
         const EMPTY: ScaleFormula = ScaleFormula::empty();
         const CHROMATIC: ScaleFormula = ScaleFormula::chromatic();
-        
+
         assert_eq!(MAJOR.note_count(), 7);
         assert!(MAJOR.has_root());
         assert!(!MAJOR.is_empty());
-        
+
         assert_eq!(EMPTY.note_count(), 0);
         assert!(!EMPTY.has_root());
         assert!(EMPTY.is_empty());
-        
+
         assert_eq!(CHROMATIC.note_count(), 12);
         assert!(CHROMATIC.has_root());
         assert!(!CHROMATIC.is_empty());
