@@ -76,6 +76,34 @@ cargo fmt
 cargo clippy
 ```
 
+### Development Workflow
+
+This project includes Git pre-commit hooks that ensure all commits pass CI checks locally:
+
+```bash
+# Set up Git hooks (run once)
+make setup-hooks
+
+# Quick development checks
+make check          # Format + clippy
+make test          # Run all tests
+make build         # Build workspace
+
+# Simulate full CI locally
+make ci-check      # Run complete CI workflow
+
+# View all available commands
+make help
+```
+
+**Pre-commit validation includes:**
+- Code formatting (`cargo fmt`)
+- Clippy lints with warnings as errors
+- Full workspace build
+- All unit tests and documentation tests
+
+Commits will be **automatically blocked** if any check fails, ensuring only CI-passing code reaches the repository.
+
 ## Usage Example
 
 ```rust
