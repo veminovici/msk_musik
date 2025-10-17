@@ -1,6 +1,8 @@
 //! Note implementation for musical notes.
 
+use crate::octave::Octave;
 use crate::semitone::Semitone;
+use std::fmt;
 use std::ops::{Add, Shl, Shr, Sub};
 
 /// A musical note represented by its semitone offset from C.
@@ -66,6 +68,33 @@ impl Note {
     /// ```
     pub const fn as_semitone(self) -> Semitone {
         Semitone::new(self.0)
+    }
+
+    /// Returns the octave of this note using MIDI octave numbering.
+    ///
+    /// This method delegates to the `Semitone::octave()` method to calculate
+    /// the octave based on MIDI convention where middle C (MIDI note 60) is
+    /// in octave 4.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::{Note, Octave};
+    ///
+    /// let middle_c = Note::new(60);     // MIDI 60
+    /// assert_eq!(middle_c.octave(), Octave::new(4));
+    ///
+    /// let low_c = Note::new(12);        // MIDI 12
+    /// assert_eq!(low_c.octave(), Octave::new(0));
+    ///
+    /// let high_c = Note::new(72);       // MIDI 72
+    /// assert_eq!(high_c.octave(), Octave::new(5));
+    ///
+    /// let sub_bass = Note::new(0);      // MIDI 0
+    /// assert_eq!(sub_bass.octave(), Octave::new(-1));
+    /// ```
+    pub const fn octave(self) -> Octave {
+        self.as_semitone().octave()
     }
 }
 
@@ -247,6 +276,41 @@ impl Shl<u8> for Note {
     }
 }
 
+impl fmt::Display for Note {
+    /// Formats a `Note` as a note name followed by octave number.
+    ///
+    /// The note name uses the chromatic scale starting from C, with sharps
+    /// for accidentals (C, C#, D, D#, E, F, F#, G, G#, A, A#, B).
+    /// The octave is obtained using the `octave()` method.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Note;
+    ///
+    /// let middle_c = Note::new(60); // MIDI middle C
+    /// assert_eq!(format!("{}", middle_c), "C4");
+    ///
+    /// let c_sharp = Note::new(61);
+    /// assert_eq!(format!("{}", c_sharp), "C#4");
+    ///
+    /// let low_c = Note::new(0);
+    /// assert_eq!(format!("{}", low_c), "C-1");
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const NOTE_NAMES: [&str; 12] = [
+            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+        ];
+
+        // TODO: Create a pitch_class type and use it here.
+        let pitch_class = (self.0 % 12) as usize;
+        let octave = self.octave().value(); // Use the octave() method
+
+        let note_name = NOTE_NAMES[pitch_class];
+        write!(f, "{}{}", note_name, octave)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -334,6 +398,86 @@ mod tests {
         let note = Note::new(7);
         let debug_str = format!("{:?}", note);
         assert!(debug_str.contains("Note"));
+    }
+
+    #[test]
+    fn test_note_display() {
+        // Test various notes across different octaves
+        assert_eq!(format!("{}", Note::new(0)), "C-1"); // MIDI 0
+        assert_eq!(format!("{}", Note::new(12)), "C0"); // MIDI 12
+        assert_eq!(format!("{}", Note::new(24)), "C1"); // MIDI 24
+        assert_eq!(format!("{}", Note::new(36)), "C2"); // MIDI 36
+        assert_eq!(format!("{}", Note::new(48)), "C3"); // MIDI 48
+        assert_eq!(format!("{}", Note::new(60)), "C4"); // MIDI 60 (middle C)
+        assert_eq!(format!("{}", Note::new(72)), "C5"); // MIDI 72
+
+        // Test chromatic notes in octave 4
+        assert_eq!(format!("{}", Note::new(60)), "C4");
+        assert_eq!(format!("{}", Note::new(61)), "C#4");
+        assert_eq!(format!("{}", Note::new(62)), "D4");
+        assert_eq!(format!("{}", Note::new(63)), "D#4");
+        assert_eq!(format!("{}", Note::new(64)), "E4");
+        assert_eq!(format!("{}", Note::new(65)), "F4");
+        assert_eq!(format!("{}", Note::new(66)), "F#4");
+        assert_eq!(format!("{}", Note::new(67)), "G4");
+        assert_eq!(format!("{}", Note::new(68)), "G#4");
+        assert_eq!(format!("{}", Note::new(69)), "A4"); // A440
+        assert_eq!(format!("{}", Note::new(70)), "A#4");
+        assert_eq!(format!("{}", Note::new(71)), "B4");
+
+        // Test edge cases
+        assert_eq!(format!("{}", Note::new(127)), "G9"); // High MIDI note
+        assert_eq!(format!("{}", Note::new(255)), "D#20"); // Maximum u8 value
+    }
+
+    #[test]
+    fn test_note_octave() {
+        // Test MIDI octave numbering convention
+        assert_eq!(Note::new(0).octave(), Octave::new(-1)); // C-1
+        assert_eq!(Note::new(12).octave(), Octave::new(0)); // C0
+        assert_eq!(Note::new(24).octave(), Octave::new(1)); // C1
+        assert_eq!(Note::new(36).octave(), Octave::new(2)); // C2
+        assert_eq!(Note::new(48).octave(), Octave::new(3)); // C3
+        assert_eq!(Note::new(60).octave(), Octave::new(4)); // C4 (middle C)
+        assert_eq!(Note::new(72).octave(), Octave::new(5)); // C5
+        assert_eq!(Note::new(84).octave(), Octave::new(6)); // C6
+
+        // Test notes within the same octave
+        for note_in_octave in 60..72 {
+            assert_eq!(Note::new(note_in_octave).octave(), Octave::new(4));
+        }
+
+        // Test various octaves for the same pitch class (C)
+        for octave in 0..10 {
+            let midi_note = 12 + octave * 12; // C notes starting from C0
+            let expected_octave = octave as i8;
+            assert_eq!(Note::new(midi_note).octave(), Octave::new(expected_octave));
+        }
+
+        // Test edge cases
+        assert_eq!(Note::new(127).octave(), Octave::new(9)); // G9
+        assert_eq!(Note::new(255).octave(), Octave::new(20)); // D#20
+
+        // Test that octave matches Display formatting
+        let test_notes = [0, 12, 24, 36, 48, 60, 72, 127];
+        for &midi_note in &test_notes {
+            let note = Note::new(midi_note);
+            let display_str = format!("{}", note);
+            let octave_from_method = note.octave().value();
+
+            // Extract octave from display string (everything after the note name)
+            let octave_from_display: i8 = if display_str.len() >= 3 && display_str.contains('#') {
+                display_str[2..].parse().unwrap()
+            } else {
+                display_str[1..].parse().unwrap()
+            };
+
+            assert_eq!(
+                octave_from_method, octave_from_display,
+                "Octave method and Display formatting should match for MIDI note {}",
+                midi_note
+            );
+        }
     }
 
     #[test]

@@ -76,7 +76,7 @@ impl Semitone {
     /// let c_minus_1 = Semitone::new(0);
     /// assert_eq!(c_minus_1.octave().value(), -1);
     /// ```
-    pub fn octave(self) -> crate::Octave {
+    pub const fn octave(self) -> crate::Octave {
         // MIDI convention: semitone 0 = C-1, semitone 12 = C0, semitone 60 = C4
         // Formula: octave = (semitone / SEMITONES_IN_OCTAVE) - 1
         let octave_number = (self.0 as i16 / SEMITONES_IN_OCTAVE as i16) - 1;
