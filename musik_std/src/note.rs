@@ -96,6 +96,38 @@ impl Note {
     pub const fn octave(self) -> Octave {
         self.as_semitone().octave()
     }
+
+    /// Returns the pitch class of this note.
+    ///
+    /// The pitch class represents the chroma of the note, ignoring octave information.
+    /// This is useful for chord analysis, scale theory, and identifying enharmonic equivalents.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::{Note, PitchClass, C, F_SHARP};
+    ///
+    /// // Different octaves of C have the same pitch class
+    /// let c0 = Note::new(12);   // C0
+    /// let c4 = Note::new(60);   // C4 (middle C)
+    /// let c8 = Note::new(108);  // C8
+    ///
+    /// assert_eq!(c0.pitch_class(), C);
+    /// assert_eq!(c4.pitch_class(), C);
+    /// assert_eq!(c8.pitch_class(), C);
+    ///
+    /// // Different pitch classes
+    /// let f_sharp = Note::new(66); // F#4
+    /// assert_eq!(f_sharp.pitch_class(), F_SHARP);
+    ///
+    /// // Verify they all have the same underlying value
+    /// assert_eq!(c0.pitch_class().value(), 0);
+    /// assert_eq!(c4.pitch_class().value(), 0);
+    /// assert_eq!(f_sharp.pitch_class().value(), 6);
+    /// ```
+    pub const fn pitch_class(self) -> crate::PitchClass {
+        self.as_semitone().pitch_class()
+    }
 }
 
 impl From<u8> for Note {
@@ -298,7 +330,7 @@ impl fmt::Display for Note {
     /// assert_eq!(format!("{}", low_c), "C-1");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pitch_class = self.as_semitone().pitch_class();
+        let pitch_class = self.pitch_class();
         let octave = self.octave().value();
 
         let note_name = pitch_class.name();
@@ -772,5 +804,79 @@ mod tests {
 
         let near_max = Note::new(244);
         assert_eq!((near_max >> 1u8).semitone(), 255); // 244 + 12 = saturates to 255
+    }
+
+    #[test]
+    fn test_note_pitch_class() {
+        // Test that notes in different octaves have the same pitch class
+
+        // Test C across different octaves
+        let c_minus_1 = Note::new(0); // C-1
+        let c0 = Note::new(12); // C0
+        let c4 = Note::new(60); // C4 (middle C)
+        let c8 = Note::new(108); // C8
+
+        assert_eq!(c_minus_1.pitch_class().value(), 0);
+        assert_eq!(c0.pitch_class().value(), 0);
+        assert_eq!(c4.pitch_class().value(), 0);
+        assert_eq!(c8.pitch_class().value(), 0);
+
+        // Test all 12 pitch classes in octave 4
+        let test_cases = [
+            (60, 0),  // C4
+            (61, 1),  // C#4/Db4
+            (62, 2),  // D4
+            (63, 3),  // D#4/Eb4
+            (64, 4),  // E4
+            (65, 5),  // F4
+            (66, 6),  // F#4/Gb4
+            (67, 7),  // G4
+            (68, 8),  // G#4/Ab4
+            (69, 9),  // A4
+            (70, 10), // A#4/Bb4
+            (71, 11), // B4
+        ];
+
+        for (midi_note, expected_pitch_class) in test_cases.iter() {
+            let note = Note::new(*midi_note);
+            let pitch_class = note.pitch_class();
+
+            assert_eq!(
+                pitch_class.value(),
+                *expected_pitch_class,
+                "MIDI note {} should have pitch class {}, but got {}",
+                midi_note,
+                expected_pitch_class,
+                pitch_class.value()
+            );
+        }
+
+        // Test pitch class consistency across multiple octaves
+        for pitch_class_value in 0..12 {
+            for octave in 0..=9 {
+                let midi_note = octave * 12 + pitch_class_value;
+                let note = Note::new(midi_note);
+                let pitch_class = note.pitch_class();
+
+                assert_eq!(
+                    pitch_class.value(),
+                    pitch_class_value,
+                    "MIDI note {} (octave {}, pitch class offset {}) should have pitch class {}, but got {}",
+                    midi_note,
+                    octave,
+                    pitch_class_value,
+                    pitch_class_value,
+                    pitch_class.value()
+                );
+            }
+        }
+
+        // Test edge cases
+        let max_note = Note::new(255);
+        let expected_pitch_class = 255 % 12; // Should be 3 (D#/Eb)
+        assert_eq!(max_note.pitch_class().value(), expected_pitch_class);
+
+        let min_note = Note::new(0);
+        assert_eq!(min_note.pitch_class().value(), 0); // Should be C
     }
 }
