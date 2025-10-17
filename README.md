@@ -4,18 +4,18 @@
 [![Security](https://github.com/veminovici/msk_musik/workflows/Security%20and%20Dependencies/badge.svg)](https://github.com/veminovici/msk_musik/actions)
 [![Documentation](https://github.com/veminovici/msk_musik/workflows/Documentation/badge.svg)](https://github.com/veminovici/msk_musik/actions)
 
-A Rust workspace containing the `musik_std` library for music processing and audio applications.
+A Rust workspace containing the `musik_theory` library for music processing and audio applications.
 
 ## Overview
 
-This workspace provides a comprehensive set of tools for music theory, audio processing, and MIDI handling in Rust. The core library `musik_std` offers fundamental building blocks for music-related applications.
+This workspace provides a comprehensive set of tools for music theory, audio processing, and MIDI handling in Rust. The core library `musik_theory` offers fundamental building blocks for music-related applications.
 
 ## Workspace Structure
 
 ```
 msk_musik/
 ├── Cargo.toml          # Workspace configuration
-├── musik_std/          # Core music library
+├── musik_theory/       # Core music library
 │   ├── Cargo.toml      # Library configuration
 │   └── src/
 │       ├── lib.rs      # Library root
@@ -27,7 +27,7 @@ msk_musik/
 
 ## Features
 
-### musik_std Library
+### musik_theory Library
 
 - **Music Theory**: Notes, intervals, scales, and chord progressions
 - **Audio Processing**: Sample buffers, waveform generation, and audio utilities
@@ -60,7 +60,7 @@ cargo test
 cargo test -- --nocapture
 
 # Run tests for specific package
-cargo test -p musik_std
+cargo test -p musik_theory
 ```
 
 ### Code Quality
@@ -108,7 +108,7 @@ Commits will be **automatically blocked** if any check fails, ensuring only CI-p
 ## Usage Example
 
 ```rust
-use musik_std::{Note, midi, audio};
+use musik_theory::{Note, midi, audio};
 
 fn main() {
     // Work with musical notes
@@ -131,7 +131,7 @@ fn main() {
 
 ### Adding New Features
 
-1. Create new modules in `musik_std/src/`
+1. Create new modules in `musik_theory/src/`
 2. Export them in `lib.rs`
 3. Add comprehensive tests
 4. Update documentation

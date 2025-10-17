@@ -53,7 +53,7 @@ jobs:
       - name: Build documentation
         run: |
           cargo doc --no-deps --all-features
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=musik_std\">" > target/doc/index.html
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=musik_theory\">" > target/doc/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

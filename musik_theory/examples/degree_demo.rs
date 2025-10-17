@@ -1,5 +1,5 @@
 /// Example demonstrating scale degrees with alterations
-use musik_std::{ChromaticNote, Degree, DegreeCollection, Note, Scale, ScaleType};
+use musik_theory::{ChromaticNote, Degree, DegreeCollection, Note, Scale, ScaleType};
 
 fn main() {
     println!("🎵 Scale Degrees with Alterations Demo\n");

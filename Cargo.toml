@@ -2,7 +2,7 @@
 resolver = "2"
 
 members = [
-    "musik_std",
+    "musik_theory",
 ]
 
 [workspace.package]

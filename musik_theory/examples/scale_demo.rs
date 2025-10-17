@@ -1,5 +1,5 @@
 /// Example demonstrating the musical scale functionality
-use musik_std::{ChromaticNote, MusicalScale, Note, Scale, ScaleType};
+use musik_theory::{ChromaticNote, MusicalScale, Note, Scale, ScaleType};
 
 fn main() {
     println!("🎵 Musical Scale Demonstration\n");

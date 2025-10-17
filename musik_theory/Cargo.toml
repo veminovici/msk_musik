@@ -1,11 +1,11 @@
 [package]
-name = "musik_std"
+name = "musik_theory"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Core music processing library"
+description = "Core music theory and processing library"
 
 [dependencies]
 # Add dependencies as needed

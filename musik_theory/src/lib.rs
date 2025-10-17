@@ -1,4 +1,4 @@
-//! # musik_std
+//! # musik_theory
 //!
 //! A comprehensive music processing library providing fundamental music theory
 //! concepts, audio processing capabilities, and utilities for music applications.
@@ -28,7 +28,7 @@
 //!
 //! ### Basic Note Operations
 //! ```rust
-//! use musik_std::{Note, ChromaticNote, TransposableNote};
+//! use musik_theory::{Note, ChromaticNote, TransposableNote};
 //!
 //! let note = Note::C;
 //! println!("Note: {} (semitone: {})", note.name(), note.semitone());
@@ -40,7 +40,7 @@
 //!
 //! ### Scale Analysis
 //! ```rust
-//! use musik_std::{Note, ScaleDegree, EnharmonicNote};
+//! use musik_theory::{Note, ScaleDegree, EnharmonicNote};
 //!
 //! let note = Note::E;
 //! let tonic = Note::C;
@@ -58,7 +58,7 @@
 //!
 //! ### Frequency and MIDI
 //! ```rust
-//! use musik_std::{Note, FrequencyNote};
+//! use musik_theory::{Note, FrequencyNote};
 //!
 //! let a4 = Note::A;
 //! let frequency = a4.frequency(4); // A4 = 440 Hz
@@ -69,7 +69,7 @@
 //!
 //! ### Musical Scales
 //! ```rust
-//! use musik_std::{Note, Scale, ScaleType, MusicalScale};
+//! use musik_theory::{Note, Scale, ScaleType, MusicalScale};
 //!
 //! // Create a C major scale
 //! let c_major = Scale::new(Note::C, ScaleType::Major);
@@ -95,7 +95,7 @@
 //!
 //! ### Scale Degrees with Alterations
 //! ```rust
-//! use musik_std::{Scale, ScaleType, Note, Degree, DegreeCollection, ChromaticNote};
+//! use musik_theory::{Scale, ScaleType, Note, Degree, DegreeCollection, ChromaticNote};
 //!
 //! let c_major = Scale::new(Note::C, ScaleType::Major);
 //!

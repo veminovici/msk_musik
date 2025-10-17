@@ -2,12 +2,12 @@
 
 # Rust Workspace: msk_musik
 
-This workspace contains a Rust project with a library named `musik_std`. The project follows standard Rust workspace conventions.
+This workspace contains a Rust project with a library named `musik_theory`. The project follows standard Rust workspace conventions.
 
 ## Project Structure
 
 - Root workspace contains `Cargo.toml` with workspace configuration
-- `musik_std/` - Core music library crate
+- `musik_theory/` - Core music library crate
 - Standard Rust development patterns and conventions
 
 ## GitHub Configuration
