@@ -17,6 +17,24 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Semitone(u8);
 
+impl Semitone {
+    /// Creates a new `Semitone` from a `u8` value.
+    ///
+    /// This is a const function that can be used in const contexts.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Semitone;
+    ///
+    /// const C_TO_C_SHARP: Semitone = Semitone::new(1);
+    /// const OCTAVE: Semitone = Semitone::new(12);
+    /// ```
+    pub const fn new(value: u8) -> Self {
+        Self(value)
+    }
+}
+
 impl From<u8> for Semitone {
     /// Creates a `Semitone` from a `u8` value.
     ///
@@ -28,7 +46,7 @@ impl From<u8> for Semitone {
     /// let semitone = Semitone::from(7u8);
     /// ```
     fn from(value: u8) -> Self {
-        Self(value)
+        Self::new(value)
     }
 }
 
@@ -123,5 +141,25 @@ mod tests {
 
         // Verify size_of_val for a specific instance
         assert_eq!(mem::size_of_val(&semitone), 1);
+    }
+
+    #[test]
+    fn test_semitone_const_new() {
+        // Test const function works in const contexts
+        const UNISON: Semitone = Semitone::new(0);
+        const SEMITONE: Semitone = Semitone::new(1);
+        const WHOLE_TONE: Semitone = Semitone::new(2);
+        const OCTAVE: Semitone = Semitone::new(12);
+
+        // Test const values are correct
+        assert_eq!(u8::from(UNISON), 0);
+        assert_eq!(u8::from(SEMITONE), 1);
+        assert_eq!(u8::from(WHOLE_TONE), 2);
+        assert_eq!(u8::from(OCTAVE), 12);
+
+        // Test that new() and from() produce equivalent results
+        let runtime_semitone = Semitone::from(7u8);
+        let const_semitone = Semitone::new(7);
+        assert_eq!(runtime_semitone, const_semitone);
     }
 }
