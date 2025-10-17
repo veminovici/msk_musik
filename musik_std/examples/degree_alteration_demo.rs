@@ -1,14 +1,14 @@
 use musik_std::prelude::*;
 
 fn main() {
-    println!("🎵 DegreeAccident Demo - Sharp and Flat Alterations");
-    println!("===================================================\n");
+    println!("🎵 DegreeAlteration Demo - Sharp and Flat Modifications");
+    println!("======================================================\n");
 
-    // Create basic accidents
-    let sharp = DegreeAccident::Sharp;
-    let flat = DegreeAccident::Flat;
+    // Create basic alterations
+    let sharp = DegreeAlteration::Sharp;
+    let flat = DegreeAlteration::Flat;
 
-    println!("📝 Basic Accidents:");
+    println!("📝 Basic Alterations:");
     println!("  Sharp: {} | Flat: {}", sharp, flat);
     println!(
         "  Sharp symbol: {} | Flat symbol: {}",
@@ -128,10 +128,15 @@ fn main() {
 
     // Default and equality
     println!("\n⚙️ Default and Equality:");
-    let default_accident = DegreeAccident::default();
-    println!("  Default accident: {}", default_accident);
-    println!("  Default is Sharp: {}", default_accident == sharp);
+    let default_alteration = DegreeAlteration::default();
+    println!("  Default alteration: {}", default_alteration);
+    println!("  Default is Sharp: {}", default_alteration == sharp);
     println!("  Sharp == Flat: {}", sharp == flat);
 
-    println!("\n✅ DegreeAccident provides flexible accidental representation!");
+    // Ordering
+    println!("\n📊 Ordering:");
+    println!("  Flat < Sharp: {}", flat < sharp);
+    println!("  Sharp > Flat: {}", sharp > flat);
+
+    println!("\n✅ DegreeAlteration provides flexible alteration representation!");
 }

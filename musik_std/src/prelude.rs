@@ -14,7 +14,7 @@
 //! ```
 
 // Re-export commonly used types and traits
-pub use crate::degree_accident::DegreeAccident;
+pub use crate::degree_alteration::DegreeAlteration;
 pub use crate::formula_degree::FormulaDegree;
 pub use crate::note::Note;
 pub use crate::octave::Octave;

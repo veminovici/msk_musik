@@ -12,7 +12,7 @@
 //! - **Semitone**: Basic musical interval representation
 //! - **Note**: Musical note abstraction containing semitone information
 //! - **Octave**: Musical octave position representation
-//! - **DegreeAccident**: Musical accidentals (sharp/flat) for degree alterations
+//! - **DegreeAlteration**: Musical alterations (sharp/flat) for degree modifications
 //! - **FormulaDegree**: Extended harmony degrees for chord construction (9ths, 11ths, 13ths, alterations)
 //! - **ScaleFormula**: Bit-flag representation of scale patterns and formulas
 //! - **Prelude**: Convenient imports for commonly used types and traits
@@ -41,9 +41,9 @@
 //! assert_eq!(ninth.to_semitone_offset(), Some(2)); // 9th = 2nd
 //! assert_eq!(flat_ninth.to_semitone_offset(), Some(1)); // ♭9th = ♭2nd
 //!
-//! // Degree accidentals for harmonic analysis
-//! let sharp = DegreeAccident::Sharp;
-//! let flat = DegreeAccident::Flat;
+//! // Degree alterations for harmonic analysis
+//! let sharp = DegreeAlteration::Sharp;
+//! let flat = DegreeAlteration::Flat;
 //! assert_eq!(sharp.semitone_offset(), 1);
 //! assert_eq!(flat.symbol(), "♭");
 //!
@@ -58,7 +58,7 @@
 //! ### Using specific imports
 //!
 //! ```rust
-//! use musik_std::{Semitone, FormulaDegree, DegreeAccident};
+//! use musik_std::{Semitone, FormulaDegree, DegreeAlteration};
 //!
 //! let semitone = Semitone::from(5u8);
 //! assert_eq!(u8::from(semitone), 5);
@@ -68,10 +68,10 @@
 //! assert_eq!(sharp_eleven.symbol(), "♯11");
 //! assert!(sharp_eleven.is_tension());
 //!
-//! // Accidental calculations
-//! let flat_accident = DegreeAccident::Flat;
+//! // Alteration calculations
+//! let flat_alteration = DegreeAlteration::Flat;
 //! let natural_third = 4; // E in C major
-//! let flat_third = natural_third + flat_accident.semitone_offset();
+//! let flat_third = natural_third + flat_alteration.semitone_offset();
 //! assert_eq!(flat_third, 3); // Eb
 //! ```
 
@@ -79,7 +79,7 @@
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
-mod degree_accident;
+mod degree_alteration;
 mod formula_degree;
 mod note;
 mod octave;
@@ -88,7 +88,7 @@ mod scale_formula;
 mod semitone;
 
 // Re-exports
-pub use degree_accident::DegreeAccident;
+pub use degree_alteration::DegreeAlteration;
 pub use formula_degree::FormulaDegree;
 pub use note::Note;
 pub use octave::Octave;
