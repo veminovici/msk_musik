@@ -5,25 +5,74 @@
 //!
 //! ## Features
 //!
-//! - Music theory primitives (notes, scales, chords)
-//! - Audio processing utilities
-//! - MIDI support
-//! - Digital signal processing
+//! - **Music Theory Primitives**: Notes, intervals, scales, and chords
+//! - **Musical Traits**: Comprehensive trait system for musical operations
+//! - **Audio Processing**: Sample buffers, waveform generation, and audio utilities
+//! - **MIDI Support**: MIDI message handling, note/frequency conversion, and protocol utilities
+//! - **Digital Signal Processing**: Audio processing foundations
+//!
+//! ## Musical Traits
+//!
+//! The library provides several powerful traits for working with musical notes:
+//!
+//! - [`ChromaticNote`]: Core chromatic note functionality
+//! - [`TransposableNote`]: Transposition and interval operations
+//! - [`EnharmonicNote`]: Enharmonic equivalent handling
+//! - [`ScaleDegree`]: Scale degree relationships
+//! - [`FrequencyNote`]: Frequency and MIDI conversions
+//! - [`CircleOfFifths`]: Circle of fifths relationships
 //!
 //! ## Examples
 //!
+//! ### Basic Note Operations
 //! ```rust
-//! use musik_std::Note;
+//! use musik_std::{Note, ChromaticNote, TransposableNote};
 //!
 //! let note = Note::C;
-//! println!("Note: {}", note);
+//! println!("Note: {} (semitone: {})", note.name(), note.semitone());
+//!
+//! // Transpose up a perfect fifth
+//! let fifth = note.transpose(7);
+//! assert_eq!(fifth, Note::G);
+//! ```
+//!
+//! ### Scale Analysis
+//! ```rust
+//! use musik_std::{Note, ScaleDegree, EnharmonicNote};
+//!
+//! let note = Note::E;
+//! let tonic = Note::C;
+//!
+//! // Check if note is in C major scale
+//! if note.is_in_major_scale(&tonic) {
+//!     let degree = note.degree_in_major(&tonic).unwrap();
+//!     println!("E is degree {} in C major", degree); // degree 3
+//! }
+//!
+//! // Get enharmonic equivalents
+//! let equivalents = Note::CSharp.enharmonic_equivalents();
+//! println!("C# equivalents: {:?}", equivalents); // ["C#", "Db"]
+//! ```
+//!
+//! ### Frequency and MIDI
+//! ```rust
+//! use musik_std::{Note, FrequencyNote};
+//!
+//! let a4 = Note::A;
+//! let frequency = a4.frequency(4); // A4 = 440 Hz
+//! let midi_note = a4.midi_number(4); // A4 = MIDI 69
+//!
+//! println!("A4: {:.2} Hz, MIDI {}", frequency, midi_note.unwrap());
 //! ```
 
 pub mod audio;
 pub mod midi;
 pub mod theory;
 
-pub use theory::Note;
+pub use theory::{
+    ChromaticNote, CircleOfFifths, EnharmonicNote, FrequencyNote, Interval, Note, ScaleDegree,
+    TransposableNote,
+};
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
