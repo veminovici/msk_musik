@@ -52,6 +52,36 @@ impl Semitone {
     pub const fn new(value: u8) -> Self {
         Self(value)
     }
+
+    /// Returns the octave number for this semitone using MIDI convention.
+    ///
+    /// In MIDI notation, semitone 0 corresponds to C-1, semitone 12 to C0,
+    /// semitone 60 to C4 (middle C), etc. This function calculates the octave
+    /// number based on this convention.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Semitone;
+    ///
+    /// // Middle C (MIDI note 60) is in octave 4
+    /// let middle_c = Semitone::new(60);
+    /// assert_eq!(middle_c.octave().value(), 4);
+    ///
+    /// // C0 (MIDI note 12) is in octave 0
+    /// let c0 = Semitone::new(12);
+    /// assert_eq!(c0.octave().value(), 0);
+    ///
+    /// // C-1 (MIDI note 0) is in octave -1
+    /// let c_minus_1 = Semitone::new(0);
+    /// assert_eq!(c_minus_1.octave().value(), -1);
+    /// ```
+    pub fn octave(self) -> crate::Octave {
+        // MIDI convention: semitone 0 = C-1, semitone 12 = C0, semitone 60 = C4
+        // Formula: octave = (semitone / SEMITONES_IN_OCTAVE) - 1
+        let octave_number = (self.0 as i16 / SEMITONES_IN_OCTAVE as i16) - 1;
+        crate::Octave::new(octave_number as i8)
+    }
 }
 
 impl From<u8> for Semitone {
@@ -368,5 +398,63 @@ mod tests {
         let f_from_c = c + interval_note;
         assert_eq!(u8::from(f_from_c), 5);
         assert_eq!(f_from_c, f);
+    }
+
+    #[test]
+    fn test_semitone_octave() {
+        // Test MIDI convention: semitone 0 = C-1, semitone 12 = C0, semitone 60 = C4
+
+        // Test middle C (MIDI note 60) is in octave 4
+        let middle_c = Semitone::new(60);
+        assert_eq!(middle_c.octave().value(), 4);
+
+        // Test C0 (MIDI note 12) is in octave 0
+        let c0 = Semitone::new(12);
+        assert_eq!(c0.octave().value(), 0);
+
+        // Test C-1 (MIDI note 0) is in octave -1
+        let c_minus_1 = Semitone::new(0);
+        assert_eq!(c_minus_1.octave().value(), -1);
+
+        // Test various octaves
+        let test_cases = [
+            (0, -1),  // C-1
+            (11, -1), // B-1
+            (12, 0),  // C0
+            (23, 0),  // B0
+            (24, 1),  // C1
+            (35, 1),  // B1
+            (36, 2),  // C2
+            (47, 2),  // B2
+            (48, 3),  // C3
+            (59, 3),  // B3
+            (60, 4),  // C4 (middle C)
+            (71, 4),  // B4
+            (72, 5),  // C5
+            (84, 6),  // C6
+            (96, 7),  // C7
+            (108, 8), // C8
+            (120, 9), // C9
+            (127, 9), // G9 (highest MIDI note)
+        ];
+
+        for (semitone, expected_octave) in test_cases.iter() {
+            let s = Semitone::new(*semitone);
+            let octave = s.octave();
+            assert_eq!(
+                octave.value(),
+                *expected_octave,
+                "Semitone {} should be in octave {}, but got {}",
+                semitone,
+                expected_octave,
+                octave.value()
+            );
+        }
+
+        // Test that consecutive octaves work correctly
+        for octave_num in -1..=9 {
+            let c_note = Semitone::new(((octave_num + 1) * 12) as u8);
+            assert_eq!(c_note.octave().value(), octave_num);
+        }
     }
 }
