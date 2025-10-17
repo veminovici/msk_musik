@@ -67,6 +67,44 @@ impl From<Semitone> for u8 {
     }
 }
 
+impl std::ops::Add<u8> for Semitone {
+    type Output = Semitone;
+
+    /// Adds a `u8` value to a `Semitone`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Semitone;
+    ///
+    /// let c = Semitone::new(0);  // C
+    /// let c_sharp = c + 1u8;     // C#
+    /// assert_eq!(u8::from(c_sharp), 1);
+    /// ```
+    fn add(self, rhs: u8) -> Self::Output {
+        Semitone::new(self.0.wrapping_add(rhs))
+    }
+}
+
+impl std::ops::Sub<u8> for Semitone {
+    type Output = Semitone;
+
+    /// Subtracts a `u8` value from a `Semitone`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Semitone;
+    ///
+    /// let c_sharp = Semitone::new(1);  // C#
+    /// let c = c_sharp - 1u8;           // C
+    /// assert_eq!(u8::from(c), 0);
+    /// ```
+    fn sub(self, rhs: u8) -> Self::Output {
+        Semitone::new(self.0.wrapping_sub(rhs))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -161,5 +199,79 @@ mod tests {
         let runtime_semitone = Semitone::from(7u8);
         let const_semitone = Semitone::new(7);
         assert_eq!(runtime_semitone, const_semitone);
+    }
+
+    #[test]
+    fn test_semitone_add_u8() {
+        // Test basic addition
+        let c = Semitone::new(0);
+        let c_sharp = c + 1u8;
+        assert_eq!(u8::from(c_sharp), 1);
+
+        // Test addition with larger values
+        let f = Semitone::new(5);
+        let f_sharp = f + 1u8;
+        assert_eq!(u8::from(f_sharp), 6);
+
+        // Test addition that would go beyond octave
+        let b = Semitone::new(11);
+        let c_next_octave = b + 1u8;
+        assert_eq!(u8::from(c_next_octave), 12);
+
+        // Test wrapping behavior at u8 boundary
+        let high_semitone = Semitone::new(254);
+        let wrapped = high_semitone + 2u8;
+        assert_eq!(u8::from(wrapped), 0); // 254 + 2 = 256 wraps to 0
+    }
+
+    #[test]
+    fn test_semitone_sub_u8() {
+        // Test basic subtraction
+        let c_sharp = Semitone::new(1);
+        let c = c_sharp - 1u8;
+        assert_eq!(u8::from(c), 0);
+
+        // Test subtraction with larger values
+        let f_sharp = Semitone::new(6);
+        let f = f_sharp - 1u8;
+        assert_eq!(u8::from(f), 5);
+
+        // Test subtraction that would go below zero
+        let c = Semitone::new(0);
+        let wrapped_high = c - 1u8;
+        assert_eq!(u8::from(wrapped_high), 255); // 0 - 1 wraps to 255
+
+        // Test larger subtraction
+        let d = Semitone::new(2);
+        let b_prev_octave = d - 3u8;
+        assert_eq!(u8::from(b_prev_octave), 255); // 2 - 3 = -1 wraps to 255
+    }
+
+    #[test]
+    fn test_semitone_arithmetic_musical_examples() {
+        // Musical interval examples
+        let c = Semitone::new(0);
+
+        // Major scale intervals from C
+        let d = c + 2u8; // Whole step
+        let e = d + 2u8; // Whole step
+        let f = e + 1u8; // Half step
+        let g = f + 2u8; // Whole step
+        let a = g + 2u8; // Whole step
+        let b = a + 2u8; // Whole step
+        let c_octave = b + 1u8; // Half step
+
+        assert_eq!(u8::from(d), 2);
+        assert_eq!(u8::from(e), 4);
+        assert_eq!(u8::from(f), 5);
+        assert_eq!(u8::from(g), 7);
+        assert_eq!(u8::from(a), 9);
+        assert_eq!(u8::from(b), 11);
+        assert_eq!(u8::from(c_octave), 12);
+
+        // Going back down
+        let b_from_octave = c_octave - 1u8;
+        assert_eq!(u8::from(b_from_octave), 11);
+        assert_eq!(b_from_octave, b);
     }
 }
