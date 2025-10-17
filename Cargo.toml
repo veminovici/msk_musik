@@ -2,7 +2,6 @@
 resolver = "2"
 
 members = [
-    "musik_theory",
     "musik_std",
 ]
 
