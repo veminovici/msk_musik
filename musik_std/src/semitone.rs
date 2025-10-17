@@ -82,6 +82,33 @@ impl Semitone {
         let octave_number = (self.0 as i16 / SEMITONES_IN_OCTAVE as i16) - 1;
         crate::Octave::new(octave_number as i8)
     }
+
+    /// Returns the pitch class for this semitone.
+    ///
+    /// The pitch class represents the chroma of the semitone, ignoring octave information.
+    /// This is calculated using modular arithmetic with the number of semitones in an octave (12).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::{Semitone, PitchClass};
+    ///
+    /// // C in different octaves all have the same pitch class
+    /// let c0 = Semitone::new(12);   // C0
+    /// let c4 = Semitone::new(60);   // C4 (middle C)
+    /// let c8 = Semitone::new(108);  // C8
+    /// 
+    /// assert_eq!(c0.pitch_class(), PitchClass::new(0));
+    /// assert_eq!(c4.pitch_class(), PitchClass::new(0));
+    /// assert_eq!(c8.pitch_class(), PitchClass::new(0));
+    ///
+    /// // Different pitch classes
+    /// let f_sharp = Semitone::new(66); // F#4
+    /// assert_eq!(f_sharp.pitch_class(), PitchClass::new(6));
+    /// ```
+    pub const fn pitch_class(self) -> crate::PitchClass {
+        crate::PitchClass::new(self.0 % SEMITONES_IN_OCTAVE)
+    }
 }
 
 impl From<u8> for Semitone {
@@ -521,6 +548,63 @@ mod tests {
             let c_note = Semitone::new(((octave_num + 1) * 12) as u8);
             assert_eq!(c_note.octave().value(), octave_num);
         }
+    }
+
+    #[test]
+    fn test_semitone_pitch_class() {
+        // Test that semitones in different octaves have the same pitch class
+
+        // Test C in different octaves (all should have pitch class 0)
+        let c_minus_1 = Semitone::new(0);   // C-1
+        let c0 = Semitone::new(12);         // C0
+        let c4 = Semitone::new(60);         // C4 (middle C)
+        let c8 = Semitone::new(108);        // C8
+
+        assert_eq!(c_minus_1.pitch_class().value(), 0);
+        assert_eq!(c0.pitch_class().value(), 0);
+        assert_eq!(c4.pitch_class().value(), 0);
+        assert_eq!(c8.pitch_class().value(), 0);
+
+        // Test all 12 pitch classes with different octaves
+        let test_cases = [
+            (0, 0),   // C
+            (1, 1),   // C#/Db
+            (2, 2),   // D
+            (3, 3),   // D#/Eb
+            (4, 4),   // E
+            (5, 5),   // F
+            (6, 6),   // F#/Gb
+            (7, 7),   // G
+            (8, 8),   // G#/Ab
+            (9, 9),   // A
+            (10, 10), // A#/Bb
+            (11, 11), // B
+        ];
+
+        for (semitone_offset, expected_pitch_class) in test_cases.iter() {
+            // Test in multiple octaves
+            for octave in 0..=9 {
+                let semitone_value = octave * 12 + semitone_offset;
+                let semitone = Semitone::new(semitone_value);
+                let pitch_class = semitone.pitch_class();
+                
+                assert_eq!(
+                    pitch_class.value(),
+                    *expected_pitch_class,
+                    "Semitone {} (octave {}, offset {}) should have pitch class {}, but got {}",
+                    semitone_value,
+                    octave,
+                    semitone_offset,
+                    expected_pitch_class,
+                    pitch_class.value()
+                );
+            }
+        }
+
+        // Test edge cases
+        let max_semitone = Semitone::new(255);
+        let expected_pitch_class = 255 % 12; // Should be 3 (D#/Eb)
+        assert_eq!(max_semitone.pitch_class().value(), expected_pitch_class);
     }
 
     #[test]

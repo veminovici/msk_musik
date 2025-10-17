@@ -39,8 +39,9 @@
 //!
 //! // Pitch classes for chromatic representation
 //! let c = C;
-//! let g = c + 7; // Perfect fifth
-//! assert_eq!(g, G);
+//! let g = G; // Perfect fifth from C
+//! assert_eq!(c.value(), 0);
+//! assert_eq!(g.value(), 7);
 //! assert_eq!(format!("{}", g), "G");
 //!
 //! // Extended harmony with FormulaDegree
@@ -116,8 +117,8 @@ pub use formula_degree::FormulaDegree;
 pub use note::Note;
 pub use octave::Octave;
 pub use pitch_class::{
-    PitchClass, C, C_SHARP, D_FLAT, D, D_SHARP, E_FLAT, E, F, F_SHARP, G_FLAT, G, G_SHARP,
-    A_FLAT, A, A_SHARP, B_FLAT, B,
+    PitchClass, A, A_FLAT, A_SHARP, B, B_FLAT, C, C_SHARP, D, D_FLAT, D_SHARP, E, E_FLAT, F,
+    F_SHARP, G, G_FLAT, G_SHARP,
 };
 pub use scale_formula::ScaleFormula;
 pub use semitone::{Semitone, SEMITONES_IN_OCTAVE};
