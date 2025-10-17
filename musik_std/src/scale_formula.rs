@@ -4,7 +4,8 @@
 //! using bit flags, where each bit position indicates whether a semitone is
 //! present in the scale.
 
-use crate::semitone::SEMITONES_IN_OCTAVE;
+use crate::note::Note;
+use crate::semitone::{Semitone, SEMITONES_IN_OCTAVE};
 use std::fmt;
 
 /// Represents a musical scale formula using bit flags.
@@ -348,6 +349,46 @@ impl ScaleFormula {
             }
         }
         result
+    }
+
+    /// Generate all notes in the scale starting from the given root note.
+    ///
+    /// Takes a root note and applies the scale formula to generate all notes
+    /// in the scale. The notes are returned in ascending semitone order.
+    ///
+    /// # Examples
+    /// ```
+    /// use musik_std::{ScaleFormula, Note};
+    ///
+    /// // C Major scale: C, D, E, F, G, A, B
+    /// let major = ScaleFormula::major();
+    /// let c_major_notes = major.notes_from_root(Note::new(0)); // C
+    ///
+    /// // Should contain: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
+    /// let expected_semitones: Vec<u8> = vec![0, 2, 4, 5, 7, 9, 11];
+    /// let actual_semitones: Vec<u8> = c_major_notes.iter()
+    ///     .map(|note| u8::from(*note))
+    ///     .collect();
+    /// assert_eq!(actual_semitones, expected_semitones);
+    ///
+    /// // F Major scale: F, G, A, Bb, C, D, E
+    /// let f_major_notes = major.notes_from_root(Note::new(5)); // F
+    /// let f_major_semitones: Vec<u8> = f_major_notes.iter()
+    ///     .map(|note| u8::from(*note))
+    ///     .collect();
+    /// // F(5), G(7), A(9), Bb(10), C(12), D(14), E(16) - continues linearly
+    /// assert_eq!(f_major_semitones, vec![5, 7, 9, 10, 12, 14, 16]);
+    ///
+    /// // Extended harmony example with jazz chords
+    /// let major_extended = ScaleFormula::major_extended();
+    /// let c_extended_notes = major_extended.notes_from_root(Note::new(0));
+    /// assert_eq!(c_extended_notes.len(), 14); // 7 notes in each octave
+    /// ```
+    pub fn notes_from_root(&self, root: Note) -> Vec<Note> {
+        self.semitones()
+            .iter()
+            .map(|&semitone_offset| root + Semitone::new(semitone_offset))
+            .collect()
     }
 
     /// Get the internal bit representation.
@@ -714,5 +755,39 @@ mod tests {
         assert_eq!(CHROMATIC.note_count(), 12);
         assert!(CHROMATIC.has_root());
         assert!(!CHROMATIC.is_empty());
+    }
+
+    #[test]
+    fn test_notes_from_root() {
+        let major = ScaleFormula::major();
+
+        // Test C major scale
+        let c_major_notes = major.notes_from_root(Note::new(0));
+        let c_major_semitones: Vec<u8> = c_major_notes.iter().map(|note| u8::from(*note)).collect();
+        assert_eq!(c_major_semitones, vec![0, 2, 4, 5, 7, 9, 11]);
+
+        // Test F major scale
+        let f_major_notes = major.notes_from_root(Note::new(5));
+        let f_major_semitones: Vec<u8> = f_major_notes.iter().map(|note| u8::from(*note)).collect();
+        assert_eq!(f_major_semitones, vec![5, 7, 9, 10, 12, 14, 16]);
+
+        // Test extended harmony
+        let major_extended = ScaleFormula::major_extended();
+        let c_extended_notes = major_extended.notes_from_root(Note::new(0));
+        assert_eq!(c_extended_notes.len(), 14);
+
+        // Test pentatonic scale
+        let pentatonic = ScaleFormula::pentatonic_major();
+        let g_pentatonic_notes = pentatonic.notes_from_root(Note::new(7)); // G
+        let g_pentatonic_semitones: Vec<u8> = g_pentatonic_notes
+            .iter()
+            .map(|note| u8::from(*note))
+            .collect();
+        assert_eq!(g_pentatonic_semitones, vec![7, 9, 11, 14, 16]); // G, A, B, D, E
+
+        // Test empty scale
+        let empty = ScaleFormula::empty();
+        let empty_notes = empty.notes_from_root(Note::new(0));
+        assert!(empty_notes.is_empty());
     }
 }

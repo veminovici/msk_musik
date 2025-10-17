@@ -121,5 +121,37 @@ fn main() {
         mixolydian_vs_major.note_count()
     );
 
+    // Demonstrate notes_from_root method
+    println!("\n🎹 Scale Notes from Root:");
+    use musik_std::Note;
+
+    // C Major scale notes
+    let c_major_notes = major.notes_from_root(Note::new(0)); // C root
+    let c_major_semitones: Vec<u8> = c_major_notes.iter().map(|note| u8::from(*note)).collect();
+    println!("C Major notes (semitones): {:?}", c_major_semitones);
+
+    // F# Major scale notes (enharmonic with Gb)
+    let fs_major_notes = major.notes_from_root(Note::new(6)); // F# root
+    let fs_major_semitones: Vec<u8> = fs_major_notes.iter().map(|note| u8::from(*note)).collect();
+    println!("F# Major notes (semitones): {:?}", fs_major_semitones);
+
+    // G Minor pentatonic scale
+    let g_minor_pent_notes = ScaleFormula::pentatonic_minor().notes_from_root(Note::new(7)); // G root
+    let g_minor_pent_semitones: Vec<u8> = g_minor_pent_notes
+        .iter()
+        .map(|note| u8::from(*note))
+        .collect();
+    println!(
+        "G Minor Pentatonic notes (semitones): {:?}",
+        g_minor_pent_semitones
+    );
+
+    // Extended harmony example
+    let c_major_extended_notes = ScaleFormula::major_extended().notes_from_root(Note::new(0));
+    println!(
+        "C Major Extended ({} notes): includes 9ths, 11ths, 13ths",
+        c_major_extended_notes.len()
+    );
+
     println!("\n✅ ScaleFormula provides efficient bit-flag scale representation!");
 }
