@@ -354,7 +354,8 @@ impl ScaleFormula {
     /// Generate all notes in the scale starting from the given root note.
     ///
     /// Takes a root note and applies the scale formula to generate all notes
-    /// in the scale. The notes are returned in ascending semitone order.
+    /// in the scale. The notes are returned as an iterator in ascending semitone order.
+    /// This avoids allocating a vector until explicitly collected.
     ///
     /// # Examples
     /// ```
@@ -362,7 +363,7 @@ impl ScaleFormula {
     ///
     /// // C Major scale: C, D, E, F, G, A, B
     /// let major = ScaleFormula::major();
-    /// let c_major_notes = major.notes_from_root(Note::new(0)); // C
+    /// let c_major_notes: Vec<Note> = major.notes_from_root(Note::new(0)).collect(); // C
     ///
     /// // Should contain: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
     /// let expected_semitones: Vec<u8> = vec![0, 2, 4, 5, 7, 9, 11];
@@ -372,7 +373,7 @@ impl ScaleFormula {
     /// assert_eq!(actual_semitones, expected_semitones);
     ///
     /// // F Major scale: F, G, A, Bb, C, D, E
-    /// let f_major_notes = major.notes_from_root(Note::new(5)); // F
+    /// let f_major_notes: Vec<Note> = major.notes_from_root(Note::new(5)).collect(); // F
     /// let f_major_semitones: Vec<u8> = f_major_notes.iter()
     ///     .map(|note| u8::from(*note))
     ///     .collect();
@@ -381,14 +382,17 @@ impl ScaleFormula {
     ///
     /// // Extended harmony example with jazz chords
     /// let major_extended = ScaleFormula::major_extended();
-    /// let c_extended_notes = major_extended.notes_from_root(Note::new(0));
+    /// let c_extended_notes: Vec<Note> = major_extended.notes_from_root(Note::new(0)).collect();
     /// assert_eq!(c_extended_notes.len(), 14); // 7 notes in each octave
+    ///
+    /// // Use iterator directly without collecting
+    /// let note_count = major.notes_from_root(Note::new(0)).count();
+    /// assert_eq!(note_count, 7);
     /// ```
-    pub fn notes_from_root(&self, root: Note) -> Vec<Note> {
+    pub fn notes_from_root(&self, root: Note) -> impl Iterator<Item = Note> + '_ {
         self.semitones()
-            .iter()
-            .map(|&semitone_offset| root + Semitone::new(semitone_offset))
-            .collect()
+            .into_iter()
+            .map(move |semitone_offset| root + Semitone::new(semitone_offset))
     }
 
     /// Get the internal bit representation.
@@ -762,23 +766,23 @@ mod tests {
         let major = ScaleFormula::major();
 
         // Test C major scale
-        let c_major_notes = major.notes_from_root(Note::new(0));
+        let c_major_notes: Vec<Note> = major.notes_from_root(Note::new(0)).collect();
         let c_major_semitones: Vec<u8> = c_major_notes.iter().map(|note| u8::from(*note)).collect();
         assert_eq!(c_major_semitones, vec![0, 2, 4, 5, 7, 9, 11]);
 
         // Test F major scale
-        let f_major_notes = major.notes_from_root(Note::new(5));
+        let f_major_notes: Vec<Note> = major.notes_from_root(Note::new(5)).collect();
         let f_major_semitones: Vec<u8> = f_major_notes.iter().map(|note| u8::from(*note)).collect();
         assert_eq!(f_major_semitones, vec![5, 7, 9, 10, 12, 14, 16]);
 
         // Test extended harmony
         let major_extended = ScaleFormula::major_extended();
-        let c_extended_notes = major_extended.notes_from_root(Note::new(0));
-        assert_eq!(c_extended_notes.len(), 14);
+        let c_extended_count = major_extended.notes_from_root(Note::new(0)).count();
+        assert_eq!(c_extended_count, 14);
 
         // Test pentatonic scale
         let pentatonic = ScaleFormula::pentatonic_major();
-        let g_pentatonic_notes = pentatonic.notes_from_root(Note::new(7)); // G
+        let g_pentatonic_notes: Vec<Note> = pentatonic.notes_from_root(Note::new(7)).collect(); // G
         let g_pentatonic_semitones: Vec<u8> = g_pentatonic_notes
             .iter()
             .map(|note| u8::from(*note))
@@ -787,7 +791,7 @@ mod tests {
 
         // Test empty scale
         let empty = ScaleFormula::empty();
-        let empty_notes = empty.notes_from_root(Note::new(0));
-        assert!(empty_notes.is_empty());
+        let empty_count = empty.notes_from_root(Note::new(0)).count();
+        assert_eq!(empty_count, 0);
     }
 }
