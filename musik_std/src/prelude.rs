@@ -17,6 +17,7 @@
 pub use crate::formula_degree::FormulaDegree;
 pub use crate::note::Note;
 pub use crate::octave::Octave;
+pub use crate::scale_formula::ScaleFormula;
 pub use crate::semitone::{Semitone, SEMITONES_IN_OCTAVE};
 
 // Future additions will include:

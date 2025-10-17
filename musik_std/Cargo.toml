@@ -15,3 +15,6 @@ description = "Standard music library with common utilities and algorithms"
 
 [[example]]
 name = "formula_degree_demo"
+
+[[example]]
+name = "scale_formula_demo"

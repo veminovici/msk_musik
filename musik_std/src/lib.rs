@@ -13,6 +13,7 @@
 //! - **Note**: Musical note abstraction containing semitone information
 //! - **Octave**: Musical octave position representation
 //! - **FormulaDegree**: Extended harmony degrees for chord construction (9ths, 11ths, 13ths, alterations)
+//! - **ScaleFormula**: Bit-flag representation of scale patterns and formulas
 //! - **Prelude**: Convenient imports for commonly used types and traits
 //!
 //! Future features may include:
@@ -38,6 +39,13 @@
 //! let flat_ninth = FormulaDegree::flat(9);
 //! assert_eq!(ninth.to_semitone_offset(), Some(2)); // 9th = 2nd
 //! assert_eq!(flat_ninth.to_semitone_offset(), Some(1)); // ♭9th = ♭2nd
+//!
+//! // Scale formulas with bit flags
+//! let major = ScaleFormula::major();
+//! let minor = ScaleFormula::minor();
+//! assert_eq!(major.note_count(), 7);
+//! assert!(major.contains_semitone(4)); // Major 3rd
+//! assert!(!minor.contains_semitone(4)); // No major 3rd in minor
 //! ```
 //!
 //! ### Using specific imports
@@ -62,12 +70,14 @@ mod formula_degree;
 mod note;
 mod octave;
 pub mod prelude;
+mod scale_formula;
 mod semitone;
 
 // Re-exports
 pub use formula_degree::FormulaDegree;
 pub use note::Note;
 pub use octave::Octave;
+pub use scale_formula::ScaleFormula;
 pub use semitone::{Semitone, SEMITONES_IN_OCTAVE};
 
 #[cfg(test)]
