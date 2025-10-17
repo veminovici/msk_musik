@@ -103,4 +103,25 @@ mod tests {
         assert!(debug_str.contains("Semitone"));
         assert!(debug_str.contains("11"));
     }
+
+    #[test]
+    fn test_semitone_size() {
+        use std::mem;
+
+        // Test that Semitone is the same size as u8 (no overhead)
+        assert_eq!(mem::size_of::<Semitone>(), mem::size_of::<u8>());
+        assert_eq!(mem::size_of::<Semitone>(), 1);
+
+        // Test alignment
+        assert_eq!(mem::align_of::<Semitone>(), mem::align_of::<u8>());
+        assert_eq!(mem::align_of::<Semitone>(), 1);
+
+        // Test that the wrapper doesn't add any runtime overhead
+        let semitone = Semitone::from(42u8);
+        let value: u8 = semitone.into();
+        assert_eq!(value, 42);
+
+        // Verify size_of_val for a specific instance
+        assert_eq!(mem::size_of_val(&semitone), 1);
+    }
 }
