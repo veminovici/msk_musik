@@ -7,7 +7,12 @@
 //!
 //! ## Features
 //!
-//! This library is currently empty and ready for development. Future features may include:
+//! Current features include:
+//!
+//! - **Semitone**: Basic musical interval representation
+//! - **Prelude**: Convenient imports for commonly used types and traits
+//!
+//! Future features may include:
 //!
 //! - **Music Algorithms**: Pattern recognition, harmony analysis, rhythm processing
 //! - **Utilities**: File I/O helpers, format conversion, data structures
@@ -16,16 +21,30 @@
 //!
 //! ## Usage
 //!
-//! ```rust
-//! use musik_std;
+//! ### Using the prelude (recommended)
 //!
-//! // Library functionality will be added here
+//! ```rust
+//! use musik_std::prelude::*;
+//!
+//! let semitone = Semitone::from(7u8);
+//! let value: u8 = semitone.into();
+//! assert_eq!(value, 7);
+//! ```
+//!
+//! ### Using specific imports
+//!
+//! ```rust
+//! use musik_std::Semitone;
+//!
+//! let semitone = Semitone::from(5u8);
+//! assert_eq!(u8::from(semitone), 5);
 //! ```
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
+pub mod prelude;
 mod semitone;
 
 // Re-exports
