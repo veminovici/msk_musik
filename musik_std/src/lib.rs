@@ -22,6 +22,7 @@
 //! - [`FrequencyNote`]: Frequency and MIDI conversions
 //! - [`CircleOfFifths`]: Circle of fifths relationships
 //! - [`MusicalScale`]: Scale operations and note enumeration
+//! - [`DegreeCollection`]: Working with scale degrees and alterations
 //!
 //! ## Examples
 //!
@@ -91,14 +92,51 @@
 //! let blues_scale = Scale::new(Note::E, ScaleType::BluesScale);
 //! let pentatonic = Scale::new(Note::G, ScaleType::PentatonicMajor);
 //! ```
+//!
+//! ### Scale Degrees with Alterations
+//! ```rust
+//! use musik_std::{Scale, ScaleType, Note, Degree, DegreeCollection, ChromaticNote};
+//!
+//! let c_major = Scale::new(Note::C, ScaleType::Major);
+//!
+//! // Create degrees with alterations
+//! let natural_3 = Degree::natural(3);    // Major 3rd
+//! let flat_3 = Degree::flat(3);          // Minor 3rd (♭3)
+//! let sharp_5 = Degree::sharp(5);        // Augmented 5th (♯5)
+//!
+//! // Get notes for individual degrees
+//! assert_eq!(c_major.note_for_degree(&natural_3), Some(Note::E));    // E (major 3rd from C)
+//! assert_eq!(c_major.note_for_degree(&flat_3), Some(Note::DSharp));  // E♭ (minor 3rd from C)
+//!
+//! // Build chords using degree collections
+//! // Major triad: 1, 3, 5
+//! let major_triad = vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)];
+//! let major_notes = c_major.valid_notes_for_degrees(&major_triad);
+//! println!("C Major triad: {:?}", major_notes.iter().map(|n| n.name()).collect::<Vec<_>>());
+//! // Output: ["C", "E", "G"]
+//!
+//! // Minor triad: 1, ♭3, 5  
+//! let minor_triad = vec![Degree::natural(1), Degree::flat(3), Degree::natural(5)];
+//! let minor_notes = c_major.valid_notes_for_degrees(&minor_triad);
+//! println!("C Minor triad: {:?}", minor_notes.iter().map(|n| n.name()).collect::<Vec<_>>());
+//! // Output: ["C", "D#", "G"] (C, E♭, G)
+//!
+//! // Complex harmony: 1, ♭3, ♯4, ♭7 (altered chord)
+//! let altered_chord = vec![
+//!     Degree::natural(1), Degree::flat(3), Degree::sharp(4), Degree::flat(7)
+//! ];
+//! let altered_notes = c_major.valid_notes_for_degrees(&altered_chord);
+//! println!("Altered chord: {:?}", altered_notes.iter().map(|n| n.name()).collect::<Vec<_>>());
+//! // Output: ["C", "D#", "F#", "A#"] (C, E♭, F♯, B♭)
+//! ```
 
 pub mod audio;
 pub mod midi;
 pub mod theory;
 
 pub use theory::{
-    ChromaticNote, CircleOfFifths, EnharmonicNote, FrequencyNote, Interval, MusicalScale, Note,
-    Scale, ScaleDegree, ScaleType, TransposableNote,
+    ChromaticNote, CircleOfFifths, Degree, DegreeCollection, EnharmonicNote, FrequencyNote,
+    Interval, MusicalScale, Note, Scale, ScaleDegree, ScaleType, TransposableNote,
 };
 
 /// Library version
