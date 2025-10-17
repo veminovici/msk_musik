@@ -14,6 +14,7 @@
 //! - **Octave**: Musical octave position representation
 //! - **DegreeAlteration**: Musical alterations (sharp/flat) for degree modifications
 //! - **FormulaDegree**: Extended harmony degrees for chord construction (9ths, 11ths, 13ths, alterations)
+//! - **ChordFormula**: Bit-packed chord degree representation for efficient chord storage and analysis
 //! - **ScaleFormula**: Bit-flag representation of scale patterns and formulas
 //! - **Prelude**: Convenient imports for commonly used types and traits
 //!
@@ -47,6 +48,18 @@
 //! assert_eq!(sharp.semitone_offset(), 1);
 //! assert_eq!(flat.symbol(), "♭");
 //!
+//! // Chord formulas with bit-packed degrees
+//! let minor_seventh = ChordFormula::minor_seventh();
+//! assert!(minor_seventh.has_degree(1, DegreeAlteration::None)); // Root
+//! assert!(minor_seventh.has_degree(3, DegreeAlteration::Flat)); // Minor 3rd
+//! assert!(minor_seventh.has_degree(5, DegreeAlteration::None)); // Perfect 5th
+//! assert!(minor_seventh.has_degree(7, DegreeAlteration::Flat)); // Minor 7th
+//!
+//! // Jazz chord construction
+//! let dom7_sharp9 = ChordFormula::dominant_seventh_sharp_ninth();
+//! let degrees = dom7_sharp9.degrees();
+//! println!("Dom7♯9 contains: {}", dom7_sharp9); // "1 3 5 ♭7 ♯9"
+//!
 //! // Scale formulas with bit flags
 //! let major = ScaleFormula::major();
 //! let minor = ScaleFormula::minor();
@@ -79,6 +92,7 @@
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
+mod chord_formula;
 mod degree_alteration;
 mod formula_degree;
 mod note;
@@ -88,6 +102,7 @@ mod scale_formula;
 mod semitone;
 
 // Re-exports
+pub use chord_formula::ChordFormula;
 pub use degree_alteration::DegreeAlteration;
 pub use formula_degree::FormulaDegree;
 pub use note::Note;

@@ -62,24 +62,24 @@ fn main() {
 
     // Example: encoding scale degrees with alterations as single bytes
     let chord_tones = [
-        ("Root", 1, None),
-        ("Minor 3rd", 3, Some(DegreeAlteration::Flat)),
-        ("Perfect 5th", 5, None),
-        ("Minor 7th", 7, Some(DegreeAlteration::Flat)),
+        ("Root", 1, DegreeAlteration::None),
+        ("Minor 3rd", 3, DegreeAlteration::Flat),
+        ("Perfect 5th", 5, DegreeAlteration::None),
+        ("Minor 7th", 7, DegreeAlteration::Flat),
     ];
 
     println!("  Chord: C minor 7 (Cm7)");
     for (name, degree, alteration) in &chord_tones {
         match alteration {
-            Some(alt) => {
+            DegreeAlteration::None => {
+                println!("    {} (degree {}): natural (no alteration)", name, degree);
+            }
+            alt => {
                 let encoded: u8 = (*alt).into();
                 println!(
                     "    {} (degree {}, alteration {}): encoded as {}",
                     name, degree, alt, encoded
                 );
-            }
-            None => {
-                println!("    {} (degree {}): no alteration", name, degree);
             }
         }
     }
