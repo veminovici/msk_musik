@@ -86,14 +86,21 @@ mod tests {
         // Test that version is a valid semver format (e.g., "0.1.0")
         assert!(VERSION.len() >= 5); // At least "0.0.0"
         assert!(VERSION.contains('.')); // Should contain dots
-        
+
         // Test that it parses as valid semver parts
         let parts: Vec<&str> = VERSION.split('.').collect();
-        assert!(parts.len() >= 3, "Version should have at least major.minor.patch");
-        
+        assert!(
+            parts.len() >= 3,
+            "Version should have at least major.minor.patch"
+        );
+
         // Each part should be numeric
         for part in parts.iter().take(3) {
-            assert!(part.parse::<u32>().is_ok(), "Version part '{}' should be numeric", part);
+            assert!(
+                part.parse::<u32>().is_ok(),
+                "Version part '{}' should be numeric",
+                part
+            );
         }
     }
 }
