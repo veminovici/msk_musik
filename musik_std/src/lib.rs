@@ -25,6 +25,12 @@
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+// Module declarations
+mod semitone;
+
+// Re-exports
+pub use semitone::Semitone;
+
 #[cfg(test)]
 mod tests {
     use super::*;
