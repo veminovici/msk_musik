@@ -97,7 +97,7 @@ impl Semitone {
     /// let c0 = Semitone::new(12);   // C0
     /// let c4 = Semitone::new(60);   // C4 (middle C)
     /// let c8 = Semitone::new(108);  // C8
-    /// 
+    ///
     /// assert_eq!(c0.pitch_class(), PitchClass::new(0));
     /// assert_eq!(c4.pitch_class(), PitchClass::new(0));
     /// assert_eq!(c8.pitch_class(), PitchClass::new(0));
@@ -555,10 +555,10 @@ mod tests {
         // Test that semitones in different octaves have the same pitch class
 
         // Test C in different octaves (all should have pitch class 0)
-        let c_minus_1 = Semitone::new(0);   // C-1
-        let c0 = Semitone::new(12);         // C0
-        let c4 = Semitone::new(60);         // C4 (middle C)
-        let c8 = Semitone::new(108);        // C8
+        let c_minus_1 = Semitone::new(0); // C-1
+        let c0 = Semitone::new(12); // C0
+        let c4 = Semitone::new(60); // C4 (middle C)
+        let c8 = Semitone::new(108); // C8
 
         assert_eq!(c_minus_1.pitch_class().value(), 0);
         assert_eq!(c0.pitch_class().value(), 0);
@@ -587,7 +587,7 @@ mod tests {
                 let semitone_value = octave * 12 + semitone_offset;
                 let semitone = Semitone::new(semitone_value);
                 let pitch_class = semitone.pitch_class();
-                
+
                 assert_eq!(
                     pitch_class.value(),
                     *expected_pitch_class,

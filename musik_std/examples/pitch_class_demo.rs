@@ -1,4 +1,4 @@
-use musik_std::{PitchClass, C, C_SHARP, D_FLAT, F_SHARP, G_FLAT, G, A_SHARP, B_FLAT};
+use musik_std::{PitchClass, A_SHARP, B_FLAT, C, C_SHARP, D_FLAT, F_SHARP, G_FLAT};
 
 fn main() {
     println!("=== PitchClass Demonstration ===\n");

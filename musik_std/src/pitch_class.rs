@@ -73,7 +73,7 @@ pub const B: PitchClass = PitchClass::new(11);
 
 impl PitchClass {
     /// The number of pitch classes in the chromatic scale.
-    pub const COUNT: u8 = 12;
+    const COUNT: u8 = 12;
 
     /// Creates a new `PitchClass` from a u8 value.
     ///
@@ -270,7 +270,6 @@ mod tests {
         let value: u8 = B.into();
         assert_eq!(value, 11);
     }
-
 
     #[test]
     fn test_all_iterator() {
