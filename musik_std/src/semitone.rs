@@ -67,10 +67,13 @@ impl From<Semitone> for u8 {
     }
 }
 
-impl std::ops::Add<u8> for Semitone {
+impl<T> std::ops::Add<T> for Semitone
+where
+    T: Into<u8>,
+{
     type Output = Semitone;
 
-    /// Adds a `u8` value to a `Semitone`.
+    /// Adds a value that can be converted to `u8` to a `Semitone`.
     ///
     /// # Examples
     ///
@@ -78,18 +81,28 @@ impl std::ops::Add<u8> for Semitone {
     /// use musik_std::Semitone;
     ///
     /// let c = Semitone::new(0);  // C
-    /// let c_sharp = c + 1u8;     // C#
+    /// let c_sharp = c + 1u8;     // C# (using u8)
     /// assert_eq!(u8::from(c_sharp), 1);
+    ///
+    /// // Also works with other types that implement Into<u8>
+    /// let d = c + true;          // D (bool converts to 1u8)
+    /// assert_eq!(u8::from(d), 1);
+    ///
+    /// let e = c + Semitone::new(4); // E (Semitone implements Into<u8>)
+    /// assert_eq!(u8::from(e), 4);
     /// ```
-    fn add(self, rhs: u8) -> Self::Output {
-        Semitone::new(self.0.wrapping_add(rhs))
+    fn add(self, rhs: T) -> Self::Output {
+        Semitone::new(self.0.wrapping_add(rhs.into()))
     }
 }
 
-impl std::ops::Sub<u8> for Semitone {
+impl<T> std::ops::Sub<T> for Semitone
+where
+    T: Into<u8>,
+{
     type Output = Semitone;
 
-    /// Subtracts a `u8` value from a `Semitone`.
+    /// Subtracts a value that can be converted to `u8` from a `Semitone`.
     ///
     /// # Examples
     ///
@@ -97,11 +110,18 @@ impl std::ops::Sub<u8> for Semitone {
     /// use musik_std::Semitone;
     ///
     /// let c_sharp = Semitone::new(1);  // C#
-    /// let c = c_sharp - 1u8;           // C
+    /// let c = c_sharp - 1u8;           // C (using u8)
     /// assert_eq!(u8::from(c), 0);
+    ///
+    /// // Also works with other types that implement Into<u8>
+    /// let f = Semitone::new(5) - true; // F - 1 semitone (bool converts to 1u8)
+    /// assert_eq!(u8::from(f), 4);
+    ///
+    /// let d = Semitone::new(5) - Semitone::new(3); // F - D# interval
+    /// assert_eq!(u8::from(d), 2);
     /// ```
-    fn sub(self, rhs: u8) -> Self::Output {
-        Semitone::new(self.0.wrapping_sub(rhs))
+    fn sub(self, rhs: T) -> Self::Output {
+        Semitone::new(self.0.wrapping_sub(rhs.into()))
     }
 }
 
@@ -202,16 +222,31 @@ mod tests {
     }
 
     #[test]
-    fn test_semitone_add_u8() {
-        // Test basic addition
+    fn test_semitone_add_various_types() {
+        // Test basic addition with u8
         let c = Semitone::new(0);
         let c_sharp = c + 1u8;
         assert_eq!(u8::from(c_sharp), 1);
 
-        // Test addition with larger values
+        // Test addition with another Semitone (which implements Into<u8>)
         let f = Semitone::new(5);
-        let f_sharp = f + 1u8;
+        let interval = Semitone::new(1);
+        let f_sharp = f + interval;
         assert_eq!(u8::from(f_sharp), 6);
+
+        // Test addition with bool (which implements Into<u8>)
+        let g = Semitone::new(7);
+        let g_sharp = g + true; // true converts to 1u8
+        assert_eq!(u8::from(g_sharp), 8);
+
+        let g_same = g + false; // false converts to 0u8
+        assert_eq!(u8::from(g_same), 7);
+
+        // Test that the generic implementation works with our own From trait implementation
+        let from_note = crate::Note::new(3);
+        let a = Semitone::new(9);
+        let a_plus_note = a + from_note;
+        assert_eq!(u8::from(a_plus_note), 12); // 9 + 3 = 12
 
         // Test addition that would go beyond octave
         let b = Semitone::new(11);
@@ -225,16 +260,31 @@ mod tests {
     }
 
     #[test]
-    fn test_semitone_sub_u8() {
-        // Test basic subtraction
+    fn test_semitone_sub_various_types() {
+        // Test basic subtraction with u8
         let c_sharp = Semitone::new(1);
         let c = c_sharp - 1u8;
         assert_eq!(u8::from(c), 0);
 
-        // Test subtraction with larger values
+        // Test subtraction with another Semitone
         let f_sharp = Semitone::new(6);
-        let f = f_sharp - 1u8;
+        let interval = Semitone::new(1);
+        let f = f_sharp - interval;
         assert_eq!(u8::from(f), 5);
+
+        // Test subtraction with bool
+        let g_sharp = Semitone::new(8);
+        let g = g_sharp - true; // true converts to 1u8
+        assert_eq!(u8::from(g), 7);
+
+        let g_same = g_sharp - false; // false converts to 0u8
+        assert_eq!(u8::from(g_same), 8);
+
+        // Test subtraction with Note
+        let from_note = crate::Note::new(2);
+        let d = Semitone::new(2);
+        let c = d - from_note;
+        assert_eq!(u8::from(c), 0); // 2 - 2 = 0
 
         // Test subtraction that would go below zero
         let c = Semitone::new(0);
@@ -249,17 +299,17 @@ mod tests {
 
     #[test]
     fn test_semitone_arithmetic_musical_examples() {
-        // Musical interval examples
+        // Musical interval examples using different types
         let c = Semitone::new(0);
 
-        // Major scale intervals from C
-        let d = c + 2u8; // Whole step
-        let e = d + 2u8; // Whole step
-        let f = e + 1u8; // Half step
-        let g = f + 2u8; // Whole step
-        let a = g + 2u8; // Whole step
-        let b = a + 2u8; // Whole step
-        let c_octave = b + 1u8; // Half step
+        // Major scale intervals from C using various types
+        let d = c + 2u8; // Whole step (u8)
+        let e = d + Semitone::new(2); // Whole step (Semitone)
+        let f = e + true; // Half step (bool -> 1u8)
+        let g = f + 2u8; // Whole step (u8)
+        let a = g + Semitone::new(2); // Whole step (Semitone)
+        let b = a + 2u8; // Whole step (u8)
+        let c_octave = b + true; // Half step (bool -> 1u8)
 
         assert_eq!(u8::from(d), 2);
         assert_eq!(u8::from(e), 4);
@@ -269,9 +319,15 @@ mod tests {
         assert_eq!(u8::from(b), 11);
         assert_eq!(u8::from(c_octave), 12);
 
-        // Going back down
-        let b_from_octave = c_octave - 1u8;
+        // Going back down using mixed types
+        let b_from_octave = c_octave - true; // true -> 1u8
         assert_eq!(u8::from(b_from_octave), 11);
         assert_eq!(b_from_octave, b);
+
+        // Test with Note type
+        let interval_note = crate::Note::new(5); // Perfect fourth
+        let f_from_c = c + interval_note;
+        assert_eq!(u8::from(f_from_c), 5);
+        assert_eq!(f_from_c, f);
     }
 }
