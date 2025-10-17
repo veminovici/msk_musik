@@ -21,6 +21,7 @@
 //! - [`ScaleDegree`]: Scale degree relationships
 //! - [`FrequencyNote`]: Frequency and MIDI conversions
 //! - [`CircleOfFifths`]: Circle of fifths relationships
+//! - [`MusicalScale`]: Scale operations and note enumeration
 //!
 //! ## Examples
 //!
@@ -64,14 +65,40 @@
 //!
 //! println!("A4: {:.2} Hz, MIDI {}", frequency, midi_note.unwrap());
 //! ```
+//!
+//! ### Musical Scales
+//! ```rust
+//! use musik_std::{Note, Scale, ScaleType, MusicalScale};
+//!
+//! // Create a C major scale
+//! let c_major = Scale::new(Note::C, ScaleType::Major);
+//! println!("Scale: {}", c_major.name()); // "C Major"
+//!
+//! // Get all notes in the scale
+//! let notes = c_major.notes();
+//! println!("Notes: {:?}", notes); // [C, D, E, F, G, A, B]
+//!
+//! // Check scale degrees
+//! assert_eq!(c_major.degree_of(&Note::E), Some(3)); // E is the 3rd degree
+//! assert_eq!(c_major.note_at_degree(5), Some(Note::G)); // 5th degree is G
+//!
+//! // Check if notes are in the scale
+//! assert!(c_major.contains(&Note::F)); // F is in C major
+//! assert!(!c_major.contains(&Note::FSharp)); // F# is not in C major
+//!
+//! // Work with different scale types
+//! let a_minor = Scale::new(Note::A, ScaleType::NaturalMinor);
+//! let blues_scale = Scale::new(Note::E, ScaleType::BluesScale);
+//! let pentatonic = Scale::new(Note::G, ScaleType::PentatonicMajor);
+//! ```
 
 pub mod audio;
 pub mod midi;
 pub mod theory;
 
 pub use theory::{
-    ChromaticNote, CircleOfFifths, EnharmonicNote, FrequencyNote, Interval, Note, ScaleDegree,
-    TransposableNote,
+    ChromaticNote, CircleOfFifths, EnharmonicNote, FrequencyNote, Interval, MusicalScale, Note,
+    Scale, ScaleDegree, ScaleType, TransposableNote,
 };
 
 /// Library version

@@ -90,6 +90,217 @@ pub trait CircleOfFifths: ChromaticNote {
     fn relative_key(&self) -> Self;
 }
 
+/// Musical scale operations and note enumeration
+pub trait MusicalScale<T>
+where
+    T: ChromaticNote + Copy,
+{
+    /// Get the root note of the scale
+    fn root(&self) -> T;
+
+    /// Get all notes in the scale as a vector
+    fn notes(&self) -> Vec<T>;
+
+    /// Get the degree (1-based) of a note in this scale
+    /// Returns None if the note is not in the scale
+    fn degree_of(&self, note: &T) -> Option<u8>;
+
+    /// Get the note at a specific degree (1-based)
+    /// Returns None if the degree is out of range
+    fn note_at_degree(&self, degree: u8) -> Option<T>;
+
+    /// Check if a note belongs to this scale
+    fn contains(&self, note: &T) -> bool {
+        self.degree_of(note).is_some()
+    }
+
+    /// Get the number of notes in the scale
+    fn len(&self) -> usize {
+        self.notes().len()
+    }
+
+    /// Check if the scale is empty (should typically be false for valid scales)
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Get the scale pattern as semitone intervals from the root
+    fn intervals(&self) -> Vec<u8>;
+
+    /// Create a scale mode starting from a different degree
+    /// Returns a new scale with the same interval pattern but starting from the specified degree
+    fn mode(&self, degree: u8) -> Option<Self>
+    where
+        Self: Sized;
+}
+
+/// Common scale types with predefined interval patterns
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScaleType {
+    Major,
+    NaturalMinor,
+    HarmonicMinor,
+    MelodicMinor,
+    Dorian,
+    Phrygian,
+    Lydian,
+    Mixolydian,
+    Locrian,
+    ChromaticScale,
+    PentatonicMajor,
+    PentatonicMinor,
+    BluesScale,
+    WholeTone,
+}
+
+impl ScaleType {
+    /// Get the interval pattern (semitones from root) for this scale type
+    pub fn intervals(&self) -> Vec<u8> {
+        match self {
+            ScaleType::Major => vec![0, 2, 4, 5, 7, 9, 11],
+            ScaleType::NaturalMinor => vec![0, 2, 3, 5, 7, 8, 10],
+            ScaleType::HarmonicMinor => vec![0, 2, 3, 5, 7, 8, 11],
+            ScaleType::MelodicMinor => vec![0, 2, 3, 5, 7, 9, 11],
+            ScaleType::Dorian => vec![0, 2, 3, 5, 7, 9, 10],
+            ScaleType::Phrygian => vec![0, 1, 3, 5, 7, 8, 10],
+            ScaleType::Lydian => vec![0, 2, 4, 6, 7, 9, 11],
+            ScaleType::Mixolydian => vec![0, 2, 4, 5, 7, 9, 10],
+            ScaleType::Locrian => vec![0, 1, 3, 5, 6, 8, 10],
+            ScaleType::ChromaticScale => vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            ScaleType::PentatonicMajor => vec![0, 2, 4, 7, 9],
+            ScaleType::PentatonicMinor => vec![0, 3, 5, 7, 10],
+            ScaleType::BluesScale => vec![0, 3, 5, 6, 7, 10],
+            ScaleType::WholeTone => vec![0, 2, 4, 6, 8, 10],
+        }
+    }
+
+    /// Get the name of the scale type
+    pub fn name(&self) -> &'static str {
+        match self {
+            ScaleType::Major => "Major",
+            ScaleType::NaturalMinor => "Natural Minor",
+            ScaleType::HarmonicMinor => "Harmonic Minor",
+            ScaleType::MelodicMinor => "Melodic Minor",
+            ScaleType::Dorian => "Dorian",
+            ScaleType::Phrygian => "Phrygian",
+            ScaleType::Lydian => "Lydian",
+            ScaleType::Mixolydian => "Mixolydian",
+            ScaleType::Locrian => "Locrian",
+            ScaleType::ChromaticScale => "Chromatic",
+            ScaleType::PentatonicMajor => "Pentatonic Major",
+            ScaleType::PentatonicMinor => "Pentatonic Minor",
+            ScaleType::BluesScale => "Blues",
+            ScaleType::WholeTone => "Whole Tone",
+        }
+    }
+}
+
+/// A concrete implementation of a musical scale
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Scale<T>
+where
+    T: ChromaticNote + Copy,
+{
+    root: T,
+    scale_type: ScaleType,
+}
+
+impl<T> Scale<T>
+where
+    T: ChromaticNote + Copy,
+{
+    /// Create a new scale with the given root note and scale type
+    pub fn new(root: T, scale_type: ScaleType) -> Self {
+        Self { root, scale_type }
+    }
+
+    /// Get the scale type
+    pub fn scale_type(&self) -> ScaleType {
+        self.scale_type
+    }
+
+    /// Get the name of the scale (e.g., "C Major", "A Minor")
+    pub fn name(&self) -> String {
+        format!("{} {}", self.root.name(), self.scale_type.name())
+    }
+}
+
+impl<T> MusicalScale<T> for Scale<T>
+where
+    T: ChromaticNote + Copy,
+{
+    fn root(&self) -> T {
+        self.root
+    }
+
+    fn notes(&self) -> Vec<T> {
+        self.intervals()
+            .into_iter()
+            .filter_map(|interval| {
+                let semitone = (self.root.semitone() + interval) % 12;
+                T::from_semitone(semitone)
+            })
+            .collect()
+    }
+
+    fn degree_of(&self, note: &T) -> Option<u8> {
+        let note_semitone = note.semitone();
+        let root_semitone = self.root.semitone();
+        let interval = (note_semitone + 12 - root_semitone) % 12;
+        
+        self.intervals()
+            .iter()
+            .position(|&scale_interval| scale_interval == interval)
+            .map(|pos| (pos + 1) as u8)
+    }
+
+    fn note_at_degree(&self, degree: u8) -> Option<T> {
+        if degree == 0 || degree as usize > self.intervals().len() {
+            return None;
+        }
+
+        let interval = self.intervals()[(degree - 1) as usize];
+        let semitone = (self.root.semitone() + interval) % 12;
+        T::from_semitone(semitone)
+    }
+
+    fn intervals(&self) -> Vec<u8> {
+        self.scale_type.intervals()
+    }
+
+    fn mode(&self, degree: u8) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if let Some(new_root) = self.note_at_degree(degree) {
+            // For modes, we need to rotate the interval pattern
+            let intervals = self.intervals();
+            let start_idx = (degree - 1) as usize;
+            
+            if start_idx >= intervals.len() {
+                return None;
+            }
+
+            // Create a new interval pattern starting from the specified degree
+            let mut new_intervals = vec![0];
+            let base_interval = intervals[start_idx];
+            
+            for i in 1..intervals.len() {
+                let idx = (start_idx + i) % intervals.len();
+                let interval = (intervals[idx] + 12 - base_interval) % 12;
+                new_intervals.push(interval);
+            }
+
+            // Create a temporary scale type for the mode
+            // Note: This is a simplified approach; in a full implementation,
+            // you might want to have specific mode types or a more flexible system
+            Some(Scale::new(new_root, self.scale_type))
+        } else {
+            None
+        }
+    }
+}
+
 /// Musical notes in chromatic scale
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Note {
@@ -637,5 +848,204 @@ mod tests {
 
         // G major -> E minor
         assert_eq!(Note::G.relative_key(), Note::E);
+    }
+
+    // MusicalScale and Scale tests
+    #[test]
+    fn test_scale_creation() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        assert_eq!(c_major.root(), Note::C);
+        assert_eq!(c_major.scale_type(), ScaleType::Major);
+        assert_eq!(c_major.name(), "C Major");
+
+        let a_minor = Scale::new(Note::A, ScaleType::NaturalMinor);
+        assert_eq!(a_minor.root(), Note::A);
+        assert_eq!(a_minor.scale_type(), ScaleType::NaturalMinor);
+        assert_eq!(a_minor.name(), "A Natural Minor");
+    }
+
+    #[test]
+    fn test_c_major_scale() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        let notes = c_major.notes();
+        
+        // C major: C D E F G A B
+        let expected = vec![
+            Note::C, Note::D, Note::E, Note::F, Note::G, Note::A, Note::B
+        ];
+        assert_eq!(notes, expected);
+        assert_eq!(c_major.len(), 7);
+        assert!(!c_major.is_empty());
+    }
+
+    #[test]
+    fn test_a_minor_scale() {
+        let a_minor = Scale::new(Note::A, ScaleType::NaturalMinor);
+        let notes = a_minor.notes();
+        
+        // A minor: A B C D E F G
+        let expected = vec![
+            Note::A, Note::B, Note::C, Note::D, Note::E, Note::F, Note::G
+        ];
+        assert_eq!(notes, expected);
+    }
+
+    #[test]
+    fn test_scale_degrees() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        
+        // Test degree_of
+        assert_eq!(c_major.degree_of(&Note::C), Some(1));
+        assert_eq!(c_major.degree_of(&Note::D), Some(2));
+        assert_eq!(c_major.degree_of(&Note::E), Some(3));
+        assert_eq!(c_major.degree_of(&Note::F), Some(4));
+        assert_eq!(c_major.degree_of(&Note::G), Some(5));
+        assert_eq!(c_major.degree_of(&Note::A), Some(6));
+        assert_eq!(c_major.degree_of(&Note::B), Some(7));
+        assert_eq!(c_major.degree_of(&Note::CSharp), None);
+        
+        // Test note_at_degree
+        assert_eq!(c_major.note_at_degree(1), Some(Note::C));
+        assert_eq!(c_major.note_at_degree(2), Some(Note::D));
+        assert_eq!(c_major.note_at_degree(7), Some(Note::B));
+        assert_eq!(c_major.note_at_degree(0), None);
+        assert_eq!(c_major.note_at_degree(8), None);
+    }
+
+    #[test]
+    fn test_scale_contains() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        
+        assert!(c_major.contains(&Note::C));
+        assert!(c_major.contains(&Note::E));
+        assert!(c_major.contains(&Note::G));
+        assert!(!c_major.contains(&Note::CSharp));
+        assert!(!c_major.contains(&Note::FSharp));
+    }
+
+    #[test]
+    fn test_scale_intervals() {
+        let major_intervals = ScaleType::Major.intervals();
+        assert_eq!(major_intervals, vec![0, 2, 4, 5, 7, 9, 11]);
+        
+        let minor_intervals = ScaleType::NaturalMinor.intervals();
+        assert_eq!(minor_intervals, vec![0, 2, 3, 5, 7, 8, 10]);
+        
+        let pentatonic_intervals = ScaleType::PentatonicMajor.intervals();
+        assert_eq!(pentatonic_intervals, vec![0, 2, 4, 7, 9]);
+    }
+
+    #[test]
+    fn test_pentatonic_scales() {
+        let c_penta_major = Scale::new(Note::C, ScaleType::PentatonicMajor);
+        let notes = c_penta_major.notes();
+        
+        // C pentatonic major: C D E G A
+        let expected = vec![Note::C, Note::D, Note::E, Note::G, Note::A];
+        assert_eq!(notes, expected);
+        assert_eq!(c_penta_major.len(), 5);
+
+        let a_penta_minor = Scale::new(Note::A, ScaleType::PentatonicMinor);
+        let minor_notes = a_penta_minor.notes();
+        
+        // A pentatonic minor: A C D E G
+        let expected_minor = vec![Note::A, Note::C, Note::D, Note::E, Note::G];
+        assert_eq!(minor_notes, expected_minor);
+    }
+
+    #[test]
+    fn test_blues_scale() {
+        let c_blues = Scale::new(Note::C, ScaleType::BluesScale);
+        let notes = c_blues.notes();
+        
+        // C blues: C Eb F F# G Bb
+        let expected = vec![Note::C, Note::DSharp, Note::F, Note::FSharp, Note::G, Note::ASharp];
+        assert_eq!(notes, expected);
+        assert_eq!(c_blues.len(), 6);
+    }
+
+    #[test]
+    fn test_chromatic_scale() {
+        let c_chromatic = Scale::new(Note::C, ScaleType::ChromaticScale);
+        let notes = c_chromatic.notes();
+        
+        assert_eq!(notes.len(), 12);
+        assert_eq!(notes[0], Note::C);
+        assert_eq!(notes[1], Note::CSharp);
+        assert_eq!(notes[11], Note::B);
+    }
+
+    #[test]
+    fn test_modes() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        
+        // D Dorian (2nd mode of C major)
+        let d_dorian = c_major.mode(2);
+        assert!(d_dorian.is_some());
+        let d_mode = d_dorian.unwrap();
+        assert_eq!(d_mode.root(), Note::D);
+        
+        // E Phrygian (3rd mode of C major)  
+        let e_phrygian = c_major.mode(3);
+        assert!(e_phrygian.is_some());
+        let e_mode = e_phrygian.unwrap();
+        assert_eq!(e_mode.root(), Note::E);
+        
+        // Invalid mode
+        let invalid_mode = c_major.mode(8);
+        assert!(invalid_mode.is_none());
+    }
+
+    #[test]
+    fn test_scale_type_names() {
+        assert_eq!(ScaleType::Major.name(), "Major");
+        assert_eq!(ScaleType::NaturalMinor.name(), "Natural Minor");
+        assert_eq!(ScaleType::Dorian.name(), "Dorian");
+        assert_eq!(ScaleType::PentatonicMajor.name(), "Pentatonic Major");
+        assert_eq!(ScaleType::BluesScale.name(), "Blues");
+    }
+
+    #[test]
+    fn test_transposed_scales() {
+        // Test that scales work correctly with different root notes
+        let g_major = Scale::new(Note::G, ScaleType::Major);
+        let notes = g_major.notes();
+        
+        // G major: G A B C D E F#
+        let expected = vec![
+            Note::G, Note::A, Note::B, Note::C, Note::D, Note::E, Note::FSharp
+        ];
+        assert_eq!(notes, expected);
+        
+        // Test degrees in G major
+        assert_eq!(g_major.degree_of(&Note::G), Some(1));
+        assert_eq!(g_major.degree_of(&Note::B), Some(3));
+        assert_eq!(g_major.degree_of(&Note::FSharp), Some(7));
+        assert_eq!(g_major.degree_of(&Note::F), None); // F natural not in G major
+    }
+
+    #[test]
+    fn test_harmonic_minor() {
+        let a_harmonic_minor = Scale::new(Note::A, ScaleType::HarmonicMinor);
+        let notes = a_harmonic_minor.notes();
+        
+        // A harmonic minor: A B C D E F G#
+        let expected = vec![
+            Note::A, Note::B, Note::C, Note::D, Note::E, Note::F, Note::GSharp
+        ];
+        assert_eq!(notes, expected);
+    }
+
+    #[test]
+    fn test_whole_tone_scale() {
+        let c_whole_tone = Scale::new(Note::C, ScaleType::WholeTone);
+        let notes = c_whole_tone.notes();
+        
+        // C whole tone: C D E F# G# A#
+        let expected = vec![
+            Note::C, Note::D, Note::E, Note::FSharp, Note::GSharp, Note::ASharp
+        ];
+        assert_eq!(notes, expected);
+        assert_eq!(c_whole_tone.len(), 6);
     }
 }

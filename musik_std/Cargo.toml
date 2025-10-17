@@ -12,3 +12,6 @@ description = "Core music processing library"
 
 [dev-dependencies]
 # Development dependencies for testing
+
+[[example]]
+name = "scale_demo"
