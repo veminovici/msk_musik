@@ -438,6 +438,173 @@ where
     }
 }
 
+/// Represents a musical chord with its notes and properties
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Chord<T: ChromaticNote> {
+    /// The root note of the chord
+    pub root: T,
+    /// The degrees used to construct the chord
+    pub degrees: Vec<Degree>,
+    /// The notes in the chord
+    pub notes: Vec<T>,
+    /// Optional chord name/symbol
+    pub name: Option<String>,
+}
+
+impl<T: ChromaticNote + Copy + PartialEq> Chord<T> {
+    /// Create a new chord
+    pub fn new(root: T, degrees: Vec<Degree>, notes: Vec<T>) -> Self {
+        Self {
+            root,
+            degrees,
+            notes,
+            name: None,
+        }
+    }
+
+    /// Create a chord with a name
+    pub fn with_name(root: T, degrees: Vec<Degree>, notes: Vec<T>, name: String) -> Self {
+        Self {
+            root,
+            degrees,
+            notes,
+            name: Some(name),
+        }
+    }
+
+    /// Get the chord name or generate one from degrees
+    pub fn display_name(&self) -> String {
+        if let Some(ref name) = self.name {
+            return name.clone();
+        }
+
+        // Generate name from degrees
+        let root_name = self.root.name();
+        let degree_symbols: Vec<String> = self.degrees.iter().map(|d| d.symbol()).collect();
+        format!("{} [{}]", root_name, degree_symbols.join(", "))
+    }
+
+    /// Get the number of notes in the chord
+    pub fn len(&self) -> usize {
+        self.notes.len()
+    }
+
+    /// Check if the chord is empty
+    pub fn is_empty(&self) -> bool {
+        self.notes.is_empty()
+    }
+
+    /// Check if the chord contains a specific note
+    pub fn contains(&self, note: &T) -> bool {
+        self.notes.contains(note)
+    }
+
+    /// Get the chord notes as names
+    pub fn note_names(&self) -> Vec<&'static str> {
+        self.notes.iter().map(|n| n.name()).collect()
+    }
+}
+
+impl<T: ChromaticNote + Copy + PartialEq> fmt::Display for Chord<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display_name())
+    }
+}
+
+/// Trait for building chords from scales and degree collections
+pub trait ChordBuilder<T>
+where
+    T: ChromaticNote + Copy + PartialEq,
+{
+    /// Build a chord from a collection of degrees
+    fn build_chord(&self, degrees: &[Degree]) -> Option<Chord<T>>;
+
+    /// Build a named chord from a collection of degrees
+    fn build_named_chord(&self, degrees: &[Degree], name: String) -> Option<Chord<T>>;
+
+    /// Build common chord types
+    fn major_triad(&self) -> Option<Chord<T>>;
+    fn minor_triad(&self) -> Option<Chord<T>>;
+    fn diminished_triad(&self) -> Option<Chord<T>>;
+    fn augmented_triad(&self) -> Option<Chord<T>>;
+    fn major_seventh(&self) -> Option<Chord<T>>;
+    fn minor_seventh(&self) -> Option<Chord<T>>;
+    fn dominant_seventh(&self) -> Option<Chord<T>>;
+}
+
+impl<T> ChordBuilder<T> for Scale<T>
+where
+    T: ChromaticNote + Copy + PartialEq,
+{
+    fn build_chord(&self, degrees: &[Degree]) -> Option<Chord<T>> {
+        let notes = self.valid_notes_for_degrees(degrees);
+        if notes.is_empty() {
+            return None;
+        }
+
+        Some(Chord::new(self.root, degrees.to_vec(), notes))
+    }
+
+    fn build_named_chord(&self, degrees: &[Degree], name: String) -> Option<Chord<T>> {
+        let notes = self.valid_notes_for_degrees(degrees);
+        if notes.is_empty() {
+            return None;
+        }
+
+        Some(Chord::with_name(self.root, degrees.to_vec(), notes, name))
+    }
+
+    fn major_triad(&self) -> Option<Chord<T>> {
+        let degrees = vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)];
+        self.build_named_chord(&degrees, "Major".to_string())
+    }
+
+    fn minor_triad(&self) -> Option<Chord<T>> {
+        let degrees = vec![Degree::natural(1), Degree::flat(3), Degree::natural(5)];
+        self.build_named_chord(&degrees, "Minor".to_string())
+    }
+
+    fn diminished_triad(&self) -> Option<Chord<T>> {
+        let degrees = vec![Degree::natural(1), Degree::flat(3), Degree::flat(5)];
+        self.build_named_chord(&degrees, "Diminished".to_string())
+    }
+
+    fn augmented_triad(&self) -> Option<Chord<T>> {
+        let degrees = vec![Degree::natural(1), Degree::natural(3), Degree::sharp(5)];
+        self.build_named_chord(&degrees, "Augmented".to_string())
+    }
+
+    fn major_seventh(&self) -> Option<Chord<T>> {
+        let degrees = vec![
+            Degree::natural(1),
+            Degree::natural(3),
+            Degree::natural(5),
+            Degree::natural(7),
+        ];
+        self.build_named_chord(&degrees, "Major 7th".to_string())
+    }
+
+    fn minor_seventh(&self) -> Option<Chord<T>> {
+        let degrees = vec![
+            Degree::natural(1),
+            Degree::flat(3),
+            Degree::natural(5),
+            Degree::flat(7),
+        ];
+        self.build_named_chord(&degrees, "Minor 7th".to_string())
+    }
+
+    fn dominant_seventh(&self) -> Option<Chord<T>> {
+        let degrees = vec![
+            Degree::natural(1),
+            Degree::natural(3),
+            Degree::natural(5),
+            Degree::flat(7),
+        ];
+        self.build_named_chord(&degrees, "Dominant 7th".to_string())
+    }
+}
+
 /// Musical notes in chromatic scale
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Note {
@@ -1439,5 +1606,207 @@ mod tests {
                 Note::ASharp, // ♭7 (Bb)
             ]
         );
+    }
+
+    #[test]
+    fn test_chord_creation() {
+        let degrees = vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)];
+
+        let chord = Chord::new(Note::C, degrees.clone(), vec![Note::C, Note::E, Note::G]);
+        assert_eq!(chord.root, Note::C);
+        assert_eq!(chord.degrees, degrees);
+        assert_eq!(chord.notes, vec![Note::C, Note::E, Note::G]);
+        assert_eq!(chord.len(), 3);
+        assert!(!chord.is_empty());
+        assert!(chord.contains(&Note::E));
+        assert!(!chord.contains(&Note::F));
+    }
+
+    #[test]
+    fn test_chord_with_name() {
+        let chord = Chord::with_name(
+            Note::C,
+            vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)],
+            vec![Note::C, Note::E, Note::G],
+            "C Major".to_string(),
+        );
+
+        assert_eq!(chord.name, Some("C Major".to_string()));
+        assert_eq!(chord.display_name(), "C Major");
+        assert_eq!(format!("{}", chord), "C Major");
+    }
+
+    #[test]
+    fn test_chord_display_without_name() {
+        let degrees = vec![Degree::natural(1), Degree::flat(3), Degree::natural(5)];
+        let chord = Chord::new(Note::A, degrees, vec![Note::A, Note::C, Note::E]);
+
+        // Should generate name from degrees
+        assert_eq!(chord.display_name(), "A [1, ♭3, 5]");
+        assert_eq!(format!("{}", chord), "A [1, ♭3, 5]");
+    }
+
+    #[test]
+    fn test_chord_note_names() {
+        let chord = Chord::new(
+            Note::G,
+            vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)],
+            vec![Note::G, Note::B, Note::D],
+        );
+
+        assert_eq!(chord.note_names(), vec!["G", "B", "D"]);
+    }
+
+    #[test]
+    fn test_major_triad() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        let chord = c_major.major_triad().unwrap();
+
+        assert_eq!(chord.root, Note::C);
+        assert_eq!(chord.notes, vec![Note::C, Note::E, Note::G]);
+        assert_eq!(chord.name, Some("Major".to_string()));
+        assert_eq!(chord.display_name(), "Major");
+    }
+
+    #[test]
+    fn test_minor_triad() {
+        let d_major = Scale::new(Note::D, ScaleType::Major);
+        let chord = d_major.minor_triad().unwrap();
+
+        assert_eq!(chord.root, Note::D);
+        assert_eq!(chord.notes, vec![Note::D, Note::F, Note::A]);
+        assert_eq!(chord.name, Some("Minor".to_string()));
+    }
+
+    #[test]
+    fn test_diminished_triad() {
+        let e_major = Scale::new(Note::E, ScaleType::Major);
+        let chord = e_major.diminished_triad().unwrap();
+
+        assert_eq!(chord.root, Note::E);
+        assert_eq!(chord.notes, vec![Note::E, Note::G, Note::ASharp]); // E, G, Bb
+        assert_eq!(chord.name, Some("Diminished".to_string()));
+    }
+
+    #[test]
+    fn test_augmented_triad() {
+        let f_major = Scale::new(Note::F, ScaleType::Major);
+        let chord = f_major.augmented_triad().unwrap();
+
+        assert_eq!(chord.root, Note::F);
+        assert_eq!(chord.notes, vec![Note::F, Note::A, Note::CSharp]); // F, A, C#
+        assert_eq!(chord.name, Some("Augmented".to_string()));
+    }
+
+    #[test]
+    fn test_seventh_chords() {
+        let g_major = Scale::new(Note::G, ScaleType::Major);
+
+        // Major 7th
+        let maj7 = g_major.major_seventh().unwrap();
+        assert_eq!(maj7.notes, vec![Note::G, Note::B, Note::D, Note::FSharp]);
+        assert_eq!(maj7.name, Some("Major 7th".to_string()));
+
+        // Minor 7th
+        let min7 = g_major.minor_seventh().unwrap();
+        assert_eq!(min7.notes, vec![Note::G, Note::ASharp, Note::D, Note::F]); // G, Bb, D, F
+        assert_eq!(min7.name, Some("Minor 7th".to_string()));
+
+        // Dominant 7th
+        let dom7 = g_major.dominant_seventh().unwrap();
+        assert_eq!(dom7.notes, vec![Note::G, Note::B, Note::D, Note::F]);
+        assert_eq!(dom7.name, Some("Dominant 7th".to_string()));
+    }
+
+    #[test]
+    fn test_build_custom_chord() {
+        let a_major = Scale::new(Note::A, ScaleType::Major);
+
+        // Sus2 chord: 1, 2, 5
+        let sus2_degrees = vec![Degree::natural(1), Degree::natural(2), Degree::natural(5)];
+        let sus2 = a_major.build_chord(&sus2_degrees).unwrap();
+
+        assert_eq!(sus2.root, Note::A);
+        assert_eq!(sus2.notes, vec![Note::A, Note::B, Note::E]);
+        assert_eq!(sus2.degrees, sus2_degrees);
+        assert_eq!(sus2.name, None);
+    }
+
+    #[test]
+    fn test_build_named_chord() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+
+        // Add9 chord: 1, 3, 5, 9 (which is 2 in next octave)
+        let add9_degrees = vec![
+            Degree::natural(1),
+            Degree::natural(3),
+            Degree::natural(5),
+            Degree::natural(2), // 9th is same as 2nd
+        ];
+        let add9 = c_major
+            .build_named_chord(&add9_degrees, "add9".to_string())
+            .unwrap();
+
+        assert_eq!(add9.notes, vec![Note::C, Note::E, Note::G, Note::D]);
+        assert_eq!(add9.name, Some("add9".to_string()));
+        assert_eq!(add9.display_name(), "add9");
+    }
+
+    #[test]
+    fn test_jazz_chord() {
+        let f_major = Scale::new(Note::F, ScaleType::Major);
+
+        // Maj7#11 chord: 1, 3, 5, 7, #4
+        let maj7_sharp11_degrees = vec![
+            Degree::natural(1),
+            Degree::natural(3),
+            Degree::natural(5),
+            Degree::natural(7),
+            Degree::sharp(4),
+        ];
+        let jazz_chord = f_major
+            .build_named_chord(&maj7_sharp11_degrees, "Maj7♯11".to_string())
+            .unwrap();
+
+        assert_eq!(
+            jazz_chord.notes,
+            vec![Note::F, Note::A, Note::C, Note::E, Note::B]
+        );
+        assert_eq!(jazz_chord.name, Some("Maj7♯11".to_string()));
+        assert_eq!(jazz_chord.len(), 5);
+    }
+
+    #[test]
+    fn test_chord_in_different_keys() {
+        // Test that the same chord formula works in different keys
+        let keys = vec![
+            (Note::C, vec![Note::C, Note::E, Note::G]),
+            (Note::D, vec![Note::D, Note::FSharp, Note::A]),
+            (Note::E, vec![Note::E, Note::GSharp, Note::B]),
+            (Note::F, vec![Note::F, Note::A, Note::C]),
+            (Note::G, vec![Note::G, Note::B, Note::D]),
+        ];
+
+        for (root, expected_notes) in keys {
+            let scale = Scale::new(root, ScaleType::Major);
+            let chord = scale.major_triad().unwrap();
+            assert_eq!(
+                chord.notes,
+                expected_notes,
+                "Major triad for {} should be {:?}",
+                root.name(),
+                expected_notes
+            );
+        }
+    }
+
+    #[test]
+    fn test_empty_chord() {
+        let c_major = Scale::new(Note::C, ScaleType::Major);
+        let empty_degrees: Vec<Degree> = vec![];
+        let chord_opt = c_major.build_chord(&empty_degrees);
+
+        // Should return None for empty degrees
+        assert!(chord_opt.is_none());
     }
 }

@@ -129,14 +129,45 @@
 //! println!("Altered chord: {:?}", altered_notes.iter().map(|n| n.name()).collect::<Vec<_>>());
 //! // Output: ["C", "D#", "F#", "A#"] (C, E♭, F♯, B♭)
 //! ```
+//!
+//! ### Chord Building
+//! ```rust
+//! use musik_theory::{Scale, ScaleType, Note, ChordBuilder, Degree};
+//!
+//! let c_major_scale = Scale::new(Note::C, ScaleType::Major);
+//!
+//! // Build common chords
+//! let major_chord = c_major_scale.major_triad().unwrap();
+//! println!("{}: {:?}", major_chord, major_chord.note_names());
+//! // Output: "C Major: ["C", "E", "G"]"
+//!
+//! let minor_chord = c_major_scale.minor_triad().unwrap();
+//! println!("{}: {:?}", minor_chord, minor_chord.note_names());
+//! // Output: "C Minor: ["C", "D#", "G"]"
+//!
+//! // Build custom chords from degrees
+//! let sus2_degrees = vec![Degree::natural(1), Degree::natural(2), Degree::natural(5)];
+//! let sus2_chord = c_major_scale.build_named_chord(&sus2_degrees, "sus2".to_string()).unwrap();
+//! println!("{}: {:?}", sus2_chord, sus2_chord.note_names());
+//! // Output: "C sus2: ["C", "D", "G"]"
+//!
+//! // Jazz chord: Major 7 sharp 11
+//! let maj7_sharp11 = vec![
+//!     Degree::natural(1), Degree::natural(3), Degree::natural(5),
+//!     Degree::natural(7), Degree::sharp(4)
+//! ];
+//! let jazz_chord = c_major_scale.build_named_chord(&maj7_sharp11, "Maj7♯11".to_string()).unwrap();
+//! println!("{}: {:?}", jazz_chord, jazz_chord.note_names());
+//! // Output: "C Maj7♯11: ["C", "E", "G", "B", "F#"]"
+//! ```
 
 pub mod audio;
 pub mod midi;
 pub mod theory;
 
 pub use theory::{
-    ChromaticNote, CircleOfFifths, Degree, DegreeCollection, EnharmonicNote, FrequencyNote,
-    Interval, MusicalScale, Note, Scale, ScaleDegree, ScaleType, TransposableNote,
+    Chord, ChordBuilder, ChromaticNote, CircleOfFifths, Degree, DegreeCollection, EnharmonicNote,
+    FrequencyNote, Interval, MusicalScale, Note, Scale, ScaleDegree, ScaleType, TransposableNote,
 };
 
 /// Library version

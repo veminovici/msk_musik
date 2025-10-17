@@ -15,3 +15,9 @@ description = "Core music theory and processing library"
 
 [[example]]
 name = "scale_demo"
+
+[[example]]
+name = "degree_demo"
+
+[[example]]
+name = "chord_demo"
