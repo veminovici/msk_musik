@@ -298,15 +298,10 @@ impl fmt::Display for Note {
     /// assert_eq!(format!("{}", low_c), "C-1");
     /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const NOTE_NAMES: [&str; 12] = [
-            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-        ];
+        let pitch_class = self.as_semitone().pitch_class();
+        let octave = self.octave().value();
 
-        // TODO: Create a pitch_class type and use it here.
-        let pitch_class = (self.0 % 12) as usize;
-        let octave = self.octave().value(); // Use the octave() method
-
-        let note_name = NOTE_NAMES[pitch_class];
+        let note_name = pitch_class.name();
         write!(f, "{}{}", note_name, octave)
     }
 }
