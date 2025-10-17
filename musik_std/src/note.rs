@@ -18,9 +18,7 @@ use crate::semitone::Semitone;
 /// let d = Note::new(2);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Note {
-    semitone: Semitone,
-}
+pub struct Note(u8);
 
 impl Note {
     /// Creates a new `Note` from a semitone value.
@@ -37,9 +35,7 @@ impl Note {
     /// const D: Note = Note::new(2);
     /// ```
     pub const fn new(semitone: u8) -> Self {
-        Self {
-            semitone: Semitone::new(semitone),
-        }
+        Self(semitone)
     }
 
     /// Returns the semitone offset of this note.
@@ -53,7 +49,7 @@ impl Note {
     /// assert_eq!(c_sharp.semitone(), 1);
     /// ```
     pub fn semitone(self) -> u8 {
-        u8::from(self.semitone)
+        self.0
     }
 
     /// Returns the semitone offset of this note as a `Semitone`.
@@ -68,7 +64,7 @@ impl Note {
     /// assert_eq!(u8::from(semitone), 2);
     /// ```
     pub const fn as_semitone(self) -> Semitone {
-        self.semitone
+        Semitone::new(self.0)
     }
 }
 
@@ -101,7 +97,7 @@ impl From<Semitone> for Note {
     /// assert_eq!(g.semitone(), 7);
     /// ```
     fn from(semitone: Semitone) -> Self {
-        Self { semitone }
+        Self(u8::from(semitone))
     }
 }
 
@@ -135,7 +131,7 @@ impl From<Note> for Semitone {
     /// assert_eq!(u8::from(semitone), 9);
     /// ```
     fn from(note: Note) -> Self {
-        note.semitone
+        Semitone::new(note.0)
     }
 }
 
