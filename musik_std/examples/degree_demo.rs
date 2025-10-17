@@ -39,10 +39,7 @@ fn main() {
     let major_notes = c_major.valid_notes_for_degrees(&major_triad);
     println!(
         "   Major Triad [1, 3, 5]: {:?}",
-        major_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        major_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Minor triad: 1, ♭3, 5
@@ -50,40 +47,23 @@ fn main() {
     let minor_notes = c_major.valid_notes_for_degrees(&minor_triad);
     println!(
         "   Minor Triad [1, ♭3, 5]: {:?}",
-        minor_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        minor_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Diminished triad: 1, ♭3, ♭5
-    let dim_triad = vec![
-        Degree::natural(1),
-        Degree::flat(3),
-        Degree::flat(5),
-    ];
+    let dim_triad = vec![Degree::natural(1), Degree::flat(3), Degree::flat(5)];
     let dim_notes = c_major.valid_notes_for_degrees(&dim_triad);
     println!(
         "   Diminished [1, ♭3, ♭5]: {:?}",
-        dim_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        dim_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Augmented triad: 1, 3, ♯5
-    let aug_triad = vec![
-        Degree::natural(1),
-        Degree::natural(3),
-        Degree::sharp(5),
-    ];
+    let aug_triad = vec![Degree::natural(1), Degree::natural(3), Degree::sharp(5)];
     let aug_notes = c_major.valid_notes_for_degrees(&aug_triad);
     println!(
         "   Augmented [1, 3, ♯5]: {:?}",
-        aug_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        aug_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Seventh chords
@@ -99,10 +79,7 @@ fn main() {
     let maj7_notes = c_major.valid_notes_for_degrees(&maj7);
     println!(
         "   Major 7th [1, 3, 5, 7]: {:?}",
-        maj7_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        maj7_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Dominant 7th: 1, 3, 5, ♭7
@@ -115,10 +92,7 @@ fn main() {
     let dom7_notes = c_major.valid_notes_for_degrees(&dom7);
     println!(
         "   Dominant 7th [1, 3, 5, ♭7]: {:?}",
-        dom7_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        dom7_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Minor 7th: 1, ♭3, 5, ♭7
@@ -131,10 +105,7 @@ fn main() {
     let min7_notes = c_major.valid_notes_for_degrees(&min7);
     println!(
         "   Minor 7th [1, ♭3, 5, ♭7]: {:?}",
-        min7_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        min7_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Blues and jazz chords
@@ -152,10 +123,7 @@ fn main() {
     let blues_notes = c_major.valid_notes_for_degrees(&blues_degrees);
     println!(
         "   Blues Scale [1, ♭3, 4, ♭5, 5, ♭7]: {:?}",
-        blues_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        blues_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Altered dominant: 1, 3, ♭5, ♭7
@@ -168,10 +136,7 @@ fn main() {
     let altered_notes = c_major.valid_notes_for_degrees(&altered_dom);
     println!(
         "   Altered Dominant [1, 3, ♭5, ♭7]: {:?}",
-        altered_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        altered_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Different keys
@@ -192,17 +157,11 @@ fn main() {
         println!("   {}:", key_name);
         println!(
             "     Major [1, 3, 5]: {:?}",
-            major_chord
-                .iter()
-                .map(|n| n.name())
-                .collect::<Vec<_>>()
+            major_chord.iter().map(|n| n.name()).collect::<Vec<_>>()
         );
         println!(
             "     Minor [1, ♭3, 5]: {:?}",
-            minor_chord
-                .iter()
-                .map(|n| n.name())
-                .collect::<Vec<_>>()
+            minor_chord.iter().map(|n| n.name()).collect::<Vec<_>>()
         );
     }
 
@@ -220,10 +179,7 @@ fn main() {
     let lydian_notes = c_major.valid_notes_for_degrees(&lydian_chord);
     println!(
         "   Lydian [1, 3, ♯4, 5, 7]: {:?}",
-        lydian_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        lydian_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Half-diminished: 1, ♭3, ♭5, ♭7
@@ -236,10 +192,7 @@ fn main() {
     let half_dim_notes = c_major.valid_notes_for_degrees(&half_dim);
     println!(
         "   Half-Diminished [1, ♭3, ♭5, ♭7]: {:?}",
-        half_dim_notes
-            .iter()
-            .map(|n| n.name())
-            .collect::<Vec<_>>()
+        half_dim_notes.iter().map(|n| n.name()).collect::<Vec<_>>()
     );
 
     // Demonstration of degree validation

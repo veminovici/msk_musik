@@ -211,24 +211,24 @@ impl Degree {
     pub fn natural(degree: u8) -> Self {
         Degree::Natural(degree)
     }
-    
+
     /// Create a flat degree
     pub fn flat(degree: u8) -> Self {
         Degree::Flat(degree)
     }
-    
+
     /// Create a sharp degree
     pub fn sharp(degree: u8) -> Self {
         Degree::Sharp(degree)
     }
-    
+
     /// Get the base degree number (1-7)
     pub fn base_degree(&self) -> u8 {
         match self {
             Degree::Natural(d) | Degree::Flat(d) | Degree::Sharp(d) => *d,
         }
     }
-    
+
     /// Get the alteration (-1 for flat, 0 for natural, +1 for sharp)
     pub fn alteration(&self) -> i8 {
         match self {
@@ -237,7 +237,7 @@ impl Degree {
             Degree::Sharp(_) => 1,
         }
     }
-    
+
     /// Convert degree to semitone offset from root in a major scale context
     pub fn to_semitone_offset(&self) -> Option<u8> {
         let base_semitones = match self.base_degree() {
@@ -250,11 +250,11 @@ impl Degree {
             7 => 11, // Major 7th
             _ => return None,
         };
-        
+
         let adjusted = (base_semitones as i8 + self.alteration()) as u8;
         Some(adjusted % 12)
     }
-    
+
     /// Get the symbol representation of the degree
     pub fn symbol(&self) -> String {
         match self {
@@ -263,7 +263,7 @@ impl Degree {
             Degree::Sharp(d) => format!("♯{}", d),
         }
     }
-    
+
     /// Get the name representation of the degree
     pub fn name(&self) -> String {
         match self {
@@ -287,13 +287,13 @@ where
 {
     /// Get notes for a collection of degrees
     fn notes_for_degrees(&self, degrees: &[Degree]) -> Vec<Option<T>>;
-    
+
     /// Get notes for degrees, filtering out invalid degrees
     fn valid_notes_for_degrees(&self, degrees: &[Degree]) -> Vec<T>;
-    
+
     /// Check if a degree is valid for this scale
     fn is_valid_degree(&self, degree: &Degree) -> bool;
-    
+
     /// Get the note for a specific degree
     fn note_for_degree(&self, degree: &Degree) -> Option<T>;
 }
@@ -409,27 +409,30 @@ where
     T: ChromaticNote + Copy,
 {
     fn notes_for_degrees(&self, degrees: &[Degree]) -> Vec<Option<T>> {
-        degrees.iter().map(|degree| self.note_for_degree(degree)).collect()
+        degrees
+            .iter()
+            .map(|degree| self.note_for_degree(degree))
+            .collect()
     }
-    
+
     fn valid_notes_for_degrees(&self, degrees: &[Degree]) -> Vec<T> {
         degrees
             .iter()
             .filter_map(|degree| self.note_for_degree(degree))
             .collect()
     }
-    
+
     fn is_valid_degree(&self, degree: &Degree) -> bool {
         self.note_for_degree(degree).is_some()
     }
-    
+
     fn note_for_degree(&self, degree: &Degree) -> Option<T> {
         // Get the semitone offset for this degree
         let semitone_offset = degree.to_semitone_offset()?;
-        
+
         // Calculate the actual semitone value
         let target_semitone = (self.root.semitone() + semitone_offset) % 12;
-        
+
         // Create the note from semitone
         T::from_semitone(target_semitone)
     }
@@ -1240,7 +1243,7 @@ mod tests {
         assert_eq!(Degree::natural(1).symbol(), "1");
         assert_eq!(Degree::flat(3).symbol(), "♭3");
         assert_eq!(Degree::sharp(5).symbol(), "♯5");
-        
+
         assert_eq!(Degree::natural(7).name(), "7");
         assert_eq!(Degree::flat(7).name(), "flat 7");
         assert_eq!(Degree::sharp(4).name(), "sharp 4");
@@ -1249,25 +1252,25 @@ mod tests {
     #[test]
     fn test_degree_to_semitone_offset() {
         // Natural degrees
-        assert_eq!(Degree::natural(1).to_semitone_offset(), Some(0));  // Root
-        assert_eq!(Degree::natural(2).to_semitone_offset(), Some(2));  // Major 2nd
-        assert_eq!(Degree::natural(3).to_semitone_offset(), Some(4));  // Major 3rd
-        assert_eq!(Degree::natural(4).to_semitone_offset(), Some(5));  // Perfect 4th
-        assert_eq!(Degree::natural(5).to_semitone_offset(), Some(7));  // Perfect 5th
-        assert_eq!(Degree::natural(6).to_semitone_offset(), Some(9));  // Major 6th
+        assert_eq!(Degree::natural(1).to_semitone_offset(), Some(0)); // Root
+        assert_eq!(Degree::natural(2).to_semitone_offset(), Some(2)); // Major 2nd
+        assert_eq!(Degree::natural(3).to_semitone_offset(), Some(4)); // Major 3rd
+        assert_eq!(Degree::natural(4).to_semitone_offset(), Some(5)); // Perfect 4th
+        assert_eq!(Degree::natural(5).to_semitone_offset(), Some(7)); // Perfect 5th
+        assert_eq!(Degree::natural(6).to_semitone_offset(), Some(9)); // Major 6th
         assert_eq!(Degree::natural(7).to_semitone_offset(), Some(11)); // Major 7th
 
         // Flat degrees
-        assert_eq!(Degree::flat(2).to_semitone_offset(), Some(1));  // Minor 2nd
-        assert_eq!(Degree::flat(3).to_semitone_offset(), Some(3));  // Minor 3rd
-        assert_eq!(Degree::flat(5).to_semitone_offset(), Some(6));  // Diminished 5th
-        assert_eq!(Degree::flat(6).to_semitone_offset(), Some(8));  // Minor 6th
+        assert_eq!(Degree::flat(2).to_semitone_offset(), Some(1)); // Minor 2nd
+        assert_eq!(Degree::flat(3).to_semitone_offset(), Some(3)); // Minor 3rd
+        assert_eq!(Degree::flat(5).to_semitone_offset(), Some(6)); // Diminished 5th
+        assert_eq!(Degree::flat(6).to_semitone_offset(), Some(8)); // Minor 6th
         assert_eq!(Degree::flat(7).to_semitone_offset(), Some(10)); // Minor 7th
 
         // Sharp degrees
-        assert_eq!(Degree::sharp(1).to_semitone_offset(), Some(1));  // Sharp root
-        assert_eq!(Degree::sharp(4).to_semitone_offset(), Some(6));  // Sharp 4th
-        assert_eq!(Degree::sharp(5).to_semitone_offset(), Some(8));  // Sharp 5th
+        assert_eq!(Degree::sharp(1).to_semitone_offset(), Some(1)); // Sharp root
+        assert_eq!(Degree::sharp(4).to_semitone_offset(), Some(6)); // Sharp 4th
+        assert_eq!(Degree::sharp(5).to_semitone_offset(), Some(8)); // Sharp 5th
     }
 
     #[test]
@@ -1284,25 +1287,30 @@ mod tests {
         assert_eq!(c_major.note_for_degree(&Degree::natural(7)), Some(Note::B));
 
         // Flat degrees
-        assert_eq!(c_major.note_for_degree(&Degree::flat(2)), Some(Note::CSharp)); // Db
-        assert_eq!(c_major.note_for_degree(&Degree::flat(3)), Some(Note::DSharp)); // Eb
-        assert_eq!(c_major.note_for_degree(&Degree::flat(7)), Some(Note::ASharp)); // Bb
+        assert_eq!(
+            c_major.note_for_degree(&Degree::flat(2)),
+            Some(Note::CSharp)
+        ); // Db
+        assert_eq!(
+            c_major.note_for_degree(&Degree::flat(3)),
+            Some(Note::DSharp)
+        ); // Eb
+        assert_eq!(
+            c_major.note_for_degree(&Degree::flat(7)),
+            Some(Note::ASharp)
+        ); // Bb
     }
 
     #[test]
     fn test_notes_for_degrees_major_triad() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // Major triad: 1, 3, 5
-        let major_degrees = vec![
-            Degree::natural(1),
-            Degree::natural(3),
-            Degree::natural(5),
-        ];
-        
+        let major_degrees = vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)];
+
         let notes = c_major.valid_notes_for_degrees(&major_degrees);
         assert_eq!(notes, vec![Note::C, Note::E, Note::G]);
-        
+
         let all_notes = c_major.notes_for_degrees(&major_degrees);
         assert_eq!(all_notes, vec![Some(Note::C), Some(Note::E), Some(Note::G)]);
     }
@@ -1310,14 +1318,10 @@ mod tests {
     #[test]
     fn test_notes_for_degrees_minor_triad() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // Minor triad: 1, ♭3, 5
-        let minor_degrees = vec![
-            Degree::natural(1),
-            Degree::flat(3),
-            Degree::natural(5),
-        ];
-        
+        let minor_degrees = vec![Degree::natural(1), Degree::flat(3), Degree::natural(5)];
+
         let notes = c_major.valid_notes_for_degrees(&minor_degrees);
         assert_eq!(notes, vec![Note::C, Note::DSharp, Note::G]); // C Eb G
     }
@@ -1325,7 +1329,7 @@ mod tests {
     #[test]
     fn test_notes_for_degrees_seventh_chords() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // Major 7th chord: 1, 3, 5, 7
         let maj7_degrees = vec![
             Degree::natural(1),
@@ -1333,10 +1337,10 @@ mod tests {
             Degree::natural(5),
             Degree::natural(7),
         ];
-        
+
         let maj7_notes = c_major.valid_notes_for_degrees(&maj7_degrees);
         assert_eq!(maj7_notes, vec![Note::C, Note::E, Note::G, Note::B]);
-        
+
         // Dominant 7th chord: 1, 3, 5, ♭7
         let dom7_degrees = vec![
             Degree::natural(1),
@@ -1344,7 +1348,7 @@ mod tests {
             Degree::natural(5),
             Degree::flat(7),
         ];
-        
+
         let dom7_notes = c_major.valid_notes_for_degrees(&dom7_degrees);
         assert_eq!(dom7_notes, vec![Note::C, Note::E, Note::G, Note::ASharp]); // C E G Bb
     }
@@ -1352,7 +1356,7 @@ mod tests {
     #[test]
     fn test_notes_for_degrees_complex_chord() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // Complex chord: 1, ♭3, ♯4, ♭7
         let complex_degrees = vec![
             Degree::natural(1),
@@ -1360,32 +1364,27 @@ mod tests {
             Degree::sharp(4),
             Degree::flat(7),
         ];
-        
+
         let notes = c_major.valid_notes_for_degrees(&complex_degrees);
-        assert_eq!(notes, vec![Note::C, Note::DSharp, Note::FSharp, Note::ASharp]); // C Eb F# Bb
+        assert_eq!(
+            notes,
+            vec![Note::C, Note::DSharp, Note::FSharp, Note::ASharp]
+        ); // C Eb F# Bb
     }
 
     #[test]
     fn test_notes_for_degrees_different_keys() {
         // Test in G major
         let g_major = Scale::new(Note::G, ScaleType::Major);
-        
-        let major_triad = vec![
-            Degree::natural(1),
-            Degree::natural(3),
-            Degree::natural(5),
-        ];
-        
+
+        let major_triad = vec![Degree::natural(1), Degree::natural(3), Degree::natural(5)];
+
         let g_notes = g_major.valid_notes_for_degrees(&major_triad);
         assert_eq!(g_notes, vec![Note::G, Note::B, Note::D]); // G B D
-        
+
         // Test minor triad in same key
-        let minor_triad = vec![
-            Degree::natural(1),
-            Degree::flat(3),
-            Degree::natural(5),
-        ];
-        
+        let minor_triad = vec![Degree::natural(1), Degree::flat(3), Degree::natural(5)];
+
         let g_minor_notes = g_major.valid_notes_for_degrees(&minor_triad);
         assert_eq!(g_minor_notes, vec![Note::G, Note::ASharp, Note::D]); // G Bb D
     }
@@ -1393,15 +1392,15 @@ mod tests {
     #[test]
     fn test_is_valid_degree() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // All natural degrees should be valid
         assert!(c_major.is_valid_degree(&Degree::natural(1)));
         assert!(c_major.is_valid_degree(&Degree::natural(7)));
-        
+
         // Flat and sharp degrees should also be valid (they resolve to chromatic notes)
         assert!(c_major.is_valid_degree(&Degree::flat(3)));
         assert!(c_major.is_valid_degree(&Degree::sharp(4)));
-        
+
         // Invalid degree numbers should be invalid
         assert_eq!(c_major.note_for_degree(&Degree::natural(0)), None);
         assert_eq!(c_major.note_for_degree(&Degree::natural(8)), None);
@@ -1417,7 +1416,7 @@ mod tests {
     #[test]
     fn test_blues_scale_degrees() {
         let c_major = Scale::new(Note::C, ScaleType::Major);
-        
+
         // Blues scale degrees: 1, ♭3, 4, ♭5, 5, ♭7
         let blues_degrees = vec![
             Degree::natural(1),
@@ -1427,15 +1426,18 @@ mod tests {
             Degree::natural(5),
             Degree::flat(7),
         ];
-        
+
         let blues_notes = c_major.valid_notes_for_degrees(&blues_degrees);
-        assert_eq!(blues_notes, vec![
-            Note::C,      // 1
-            Note::DSharp, // ♭3 (Eb)
-            Note::F,      // 4
-            Note::FSharp, // ♭5 (F#/Gb)
-            Note::G,      // 5
-            Note::ASharp, // ♭7 (Bb)
-        ]);
+        assert_eq!(
+            blues_notes,
+            vec![
+                Note::C,      // 1
+                Note::DSharp, // ♭3 (Eb)
+                Note::F,      // 4
+                Note::FSharp, // ♭5 (F#/Gb)
+                Note::G,      // 5
+                Note::ASharp, // ♭7 (Bb)
+            ]
+        );
     }
 }
