@@ -94,7 +94,11 @@ fn main() {
     // Calculate the interval from C to G
     // Note: This is a simplified example - real interval calculation
     // would need to handle wrapping and direction
-    println!("From C({}) to G({}) is 7 semitones", note1.semitone(), note2.semitone());
+    println!(
+        "From C({}) to G({}) is 7 semitones",
+        note1.semitone(),
+        note2.semitone()
+    );
 
     // Going backwards from G to C
     let back_to_c = note2 - Semitone::new(7);
