@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Rust: Build Workspace",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["build"],
+      "group": "build",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Rust: Build Release",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["build", "--release"],
+      "group": "build",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Rust: Test",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["test"],
+      "group": "test",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Rust: Check",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["check"],
+      "group": "build",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Rust: Clippy",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["clippy"],
+      "group": "build",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Rust: Format",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["fmt"],
+      "group": "build"
+    },
+    {
+      "label": "Rust: Clean",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["clean"],
+      "group": "build"
+    },
+    {
+      "label": "Rust: Doc",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["doc", "--open"],
+      "group": "build"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "musik_std",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourusername/msk_musik"
+description = "A music processing library workspace"
+
+[workspace.dependencies]
+# Common dependencies can be defined here and shared across workspace members

@@ -1,0 +1,14 @@
+[package]
+name = "musik_std"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core music processing library"
+
+[dependencies]
+# Add dependencies as needed
+
+[dev-dependencies]
+# Development dependencies for testing
