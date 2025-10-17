@@ -10,6 +10,12 @@ This workspace contains a Rust project with a library named `musik_std`. The pro
 - `musik_std/` - Core music library crate
 - Standard Rust development patterns and conventions
 
+## GitHub Configuration
+
+- user.name: veminovici
+- Repository URL: https://github.com/veminovici/msk_musik
+- Use this username for all GitHub-related links and references
+
 ## Development Guidelines
 
 - Follow Rust naming conventions (snake_case for modules, functions, variables)
