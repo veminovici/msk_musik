@@ -1,4 +1,4 @@
-# msk_musik
+# MUSIK PROJECT
 
 [![CI](https://github.com/veminovici/msk_musik/workflows/CI/badge.svg)](https://github.com/veminovici/msk_musik/actions)
 [![Security](https://github.com/veminovici/msk_musik/workflows/Security%20and%20Dependencies/badge.svg)](https://github.com/veminovici/msk_musik/actions)
