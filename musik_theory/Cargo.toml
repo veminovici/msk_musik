@@ -8,7 +8,7 @@ repository.workspace = true
 description = "Core music theory and processing library"
 
 [dependencies]
-# Add dependencies as needed
+musik_std = { path = "../musik_std" }
 
 [dev-dependencies]
 # Development dependencies for testing

@@ -12,6 +12,7 @@
 //! - **Semitone**: Basic musical interval representation
 //! - **Note**: Musical note abstraction containing semitone information
 //! - **Octave**: Musical octave position representation
+//! - **FormulaDegree**: Extended harmony degrees for chord construction (9ths, 11ths, 13ths, alterations)
 //! - **Prelude**: Convenient imports for commonly used types and traits
 //!
 //! Future features may include:
@@ -31,27 +32,40 @@
 //! let semitone = Semitone::from(7u8);
 //! let value: u8 = semitone.into();
 //! assert_eq!(value, 7);
+//!
+//! // Extended harmony with FormulaDegree
+//! let ninth = FormulaDegree::natural(9);
+//! let flat_ninth = FormulaDegree::flat(9);
+//! assert_eq!(ninth.to_semitone_offset(), Some(2)); // 9th = 2nd
+//! assert_eq!(flat_ninth.to_semitone_offset(), Some(1)); // ♭9th = ♭2nd
 //! ```
 //!
 //! ### Using specific imports
 //!
 //! ```rust
-//! use musik_std::Semitone;
+//! use musik_std::{Semitone, FormulaDegree};
 //!
 //! let semitone = Semitone::from(5u8);
 //! assert_eq!(u8::from(semitone), 5);
+//!
+//! // Jazz chord extensions
+//! let sharp_eleven = FormulaDegree::sharp(11);
+//! assert_eq!(sharp_eleven.symbol(), "♯11");
+//! assert!(sharp_eleven.is_tension());
 //! ```
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
+mod formula_degree;
 mod note;
 mod octave;
 pub mod prelude;
 mod semitone;
 
 // Re-exports
+pub use formula_degree::FormulaDegree;
 pub use note::Note;
 pub use octave::Octave;
 pub use semitone::{Semitone, SEMITONES_IN_OCTAVE};

@@ -12,3 +12,6 @@ description = "Standard music library with common utilities and algorithms"
 
 [dev-dependencies]
 # Development dependencies for testing
+
+[[example]]
+name = "formula_degree_demo"

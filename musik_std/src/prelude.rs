@@ -14,6 +14,7 @@
 //! ```
 
 // Re-export commonly used types and traits
+pub use crate::formula_degree::FormulaDegree;
 pub use crate::note::Note;
 pub use crate::octave::Octave;
 pub use crate::semitone::{Semitone, SEMITONES_IN_OCTAVE};

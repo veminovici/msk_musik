@@ -280,7 +280,6 @@ impl fmt::Display for Degree {
     }
 }
 
-/// Trait for working with collections of degrees
 pub trait DegreeCollection<T>
 where
     T: ChromaticNote + Copy,
