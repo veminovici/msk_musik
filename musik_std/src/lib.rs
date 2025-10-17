@@ -44,10 +44,12 @@
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
+mod note;
 pub mod prelude;
 mod semitone;
 
 // Re-exports
+pub use note::Note;
 pub use semitone::Semitone;
 
 #[cfg(test)]

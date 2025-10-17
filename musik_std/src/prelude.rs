@@ -14,11 +14,11 @@
 //! ```
 
 // Re-export commonly used types and traits
+pub use crate::note::Note;
 pub use crate::semitone::Semitone;
 
 // Future additions will include:
 // pub use crate::interval::Interval;
-// pub use crate::note::Note;
 // pub use crate::chord::Chord;
 // pub use crate::scale::Scale;
 // pub use crate::traits::*;
