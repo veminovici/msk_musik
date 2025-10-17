@@ -2,26 +2,26 @@ name: Documentation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   docs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-    - name: Build documentation
-      run: cargo doc --no-deps --all-features
+      - name: Build documentation
+        run: cargo doc --no-deps --all-features
 
-    - name: Check documentation
-      run: cargo doc --no-deps --all-features --document-private-items
+      - name: Check documentation
+        run: cargo doc --no-deps --all-features --document-private-items
 
   docs-deploy:
     name: Deploy Documentation
@@ -29,20 +29,20 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: docs
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-    - name: Build documentation
-      run: |
-        cargo doc --no-deps --all-features
-        echo "<meta http-equiv=\"refresh\" content=\"0; url=musik_std\">" > target/doc/index.html
+      - name: Build documentation
+        run: |
+          cargo doc --no-deps --all-features
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=musik_std\">" > target/doc/index.html
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./target/doc
-        cname: false
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc
+          cname: false
