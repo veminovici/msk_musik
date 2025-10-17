@@ -17,7 +17,12 @@ fn main() {
                 let shifted = original >> octaves;
                 let shifted_value = u8::from(shifted);
                 let preserved_pitch_class = shifted_value % 12;
-                (pitch_class as u8, octaves, shifted_value, preserved_pitch_class)
+                (
+                    pitch_class as u8,
+                    octaves,
+                    shifted_value,
+                    preserved_pitch_class,
+                )
             })
         })
         .collect();
@@ -105,18 +110,20 @@ fn main() {
     let chained_result = (0..12u8)
         .map(Semitone::new)
         .map(|s| s >> 2u8) // Up 2 octaves
-        .map(|s| s << 1u8) // Down 1 octave  
+        .map(|s| s << 1u8) // Down 1 octave
         .enumerate()
         .filter(|(pc, _)| *pc % 3 == 0) // Every 3rd pitch class
         .map(|(pc, semitone)| (pc, u8::from(semitone), u8::from(semitone) % 12))
         .collect::<Vec<_>>();
 
-    chained_result.iter().for_each(|(original_pc, final_value, preserved_pc)| {
-        println!(
-            "  Chain result: PC {} → semitone {} (PC {})",
-            original_pc, final_value, preserved_pc
-        );
-    });
+    chained_result
+        .iter()
+        .for_each(|(original_pc, final_value, preserved_pc)| {
+            println!(
+                "  Chain result: PC {} → semitone {} (PC {})",
+                original_pc, final_value, preserved_pc
+            );
+        });
 
     println!("\n🎼 Functional programming demonstration completed!");
     println!("   Benefits: Immutable data flow, composable operations, expressive intent");
