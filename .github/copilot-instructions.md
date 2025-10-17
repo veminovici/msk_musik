@@ -23,6 +23,14 @@ This workspace contains a Rust project with a library named `musik_theory`. The 
 - Implement proper error handling with Result types
 - Write comprehensive tests for library functions
 - Document public APIs with rustdoc comments
+- Use constants as much as possible instead of hardcoded values
+- Avoid unnecessary allocations and clones
+- Prefer iterators and functional programming constructs over loops
+- Use pattern matching and enums for better code clarity
+- Leverage Rust's ownership model to manage resources effectively
+- Minimize the use of `unwrap` and `expect` in favor of proper error handling
+- Use `Result` and `Option` types for functions that can fail or return nothing
+- Use const functions where applicable
 
 ## Workspace Commands
 
