@@ -299,7 +299,7 @@ at your option.
 Contributions are welcome! Please ensure:
 
 1. All tests pass (`cargo test`)
-2. Code is formatted (`cargo fmt`)  
+2. Code is formatted (`cargo fmt`)
 3. No clippy warnings (`cargo clippy`)
 4. Documentation is updated for new features
 5. Examples are provided for significant new functionality

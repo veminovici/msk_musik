@@ -124,23 +124,23 @@ fn main() {
     // Work with musical notes
     let middle_c = Note::new(60); // MIDI middle C
     println!("Note: {} (octave: {})", middle_c, middle_c.octave());
-    
+
     // Pitch class operations
     let pitch_class = middle_c.pitch_class();
     println!("Pitch class: {} ({})", pitch_class.name(), pitch_class.value());
-    
+
     // Scale construction
     let c_major = ScaleFormula::major();
     let scale_notes = c_major.notes_from_root(middle_c);
     println!("C Major scale: {:?}", scale_notes);
-    
+
     // Chord construction
     let major_triad = ChordFormula::new()
         .with_degree(FormulaDegree::natural(1))
         .with_degree(FormulaDegree::natural(3))
         .with_degree(FormulaDegree::natural(5));
     println!("Major triad formula: {}", major_triad);
-    
+
     // Semitone operations
     let semitone = Semitone::new(7); // Perfect fifth
     let fifth_above = middle_c + semitone;
@@ -191,7 +191,7 @@ This project is licensed under the MIT OR Apache-2.0 license.
 - [x] Pitch class system with ergonomic constants
 - [x] Scale and chord formula systems
 - [x] Comprehensive test coverage (120+ tests)
-- [ ] Interval calculations and inversions  
+- [ ] Interval calculations and inversions
 - [ ] Circle of fifths utilities
 - [ ] Key signature support
 - [ ] Extended jazz chord notations
