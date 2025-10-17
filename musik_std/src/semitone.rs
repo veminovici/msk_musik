@@ -1,5 +1,24 @@
 //! Semitone implementation for musical intervals.
 
+/// The number of semitones in an octave.
+///
+/// In Western music theory, an octave contains exactly 12 semitones.
+/// This constant is useful for octave calculations and modular arithmetic.
+///
+/// # Examples
+///
+/// ```
+/// use musik_std::SEMITONES_IN_OCTAVE;
+///
+/// assert_eq!(SEMITONES_IN_OCTAVE, 12);
+///
+/// // Use for octave calculations
+/// let octave_count = 3;
+/// let total_semitones = octave_count * SEMITONES_IN_OCTAVE as usize;
+/// assert_eq!(total_semitones, 36);
+/// ```
+pub const SEMITONES_IN_OCTAVE: u8 = 12;
+
 /// A semitone represents the smallest musical interval in Western music.
 ///
 /// Semitones are the basic unit of measurement for musical intervals.
@@ -219,6 +238,26 @@ mod tests {
         let runtime_semitone = Semitone::from(7u8);
         let const_semitone = Semitone::new(7);
         assert_eq!(runtime_semitone, const_semitone);
+    }
+
+    #[test]
+    fn test_semitones_in_octave_constant() {
+        // Test the constant value is correct
+        assert_eq!(SEMITONES_IN_OCTAVE, 12);
+
+        // Test using the constant in musical calculations
+        let c = Semitone::new(0); // C
+        let c_next_octave = c + SEMITONES_IN_OCTAVE;
+        assert_eq!(u8::from(c_next_octave), 12);
+
+        // Test octave modulo arithmetic
+        let high_note = Semitone::new(25); // C + 2 octaves + 1 semitone
+        let normalized = Semitone::new(u8::from(high_note) % SEMITONES_IN_OCTAVE);
+        assert_eq!(u8::from(normalized), 1); // Should be C#
+
+        // Test that the constant works in const contexts
+        const OCTAVE_SIZE: u8 = SEMITONES_IN_OCTAVE;
+        assert_eq!(OCTAVE_SIZE, 12);
     }
 
     #[test]

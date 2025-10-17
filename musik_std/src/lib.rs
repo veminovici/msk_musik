@@ -10,6 +10,8 @@
 //! Current features include:
 //!
 //! - **Semitone**: Basic musical interval representation
+//! - **Note**: Musical note abstraction containing semitone information
+//! - **Octave**: Musical octave position representation
 //! - **Prelude**: Convenient imports for commonly used types and traits
 //!
 //! Future features may include:
@@ -45,12 +47,14 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Module declarations
 mod note;
+mod octave;
 pub mod prelude;
 mod semitone;
 
 // Re-exports
 pub use note::Note;
-pub use semitone::Semitone;
+pub use octave::Octave;
+pub use semitone::{Semitone, SEMITONES_IN_OCTAVE};
 
 #[cfg(test)]
 mod tests {

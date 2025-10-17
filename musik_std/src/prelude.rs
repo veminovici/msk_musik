@@ -15,7 +15,8 @@
 
 // Re-export commonly used types and traits
 pub use crate::note::Note;
-pub use crate::semitone::Semitone;
+pub use crate::octave::Octave;
+pub use crate::semitone::{Semitone, SEMITONES_IN_OCTAVE};
 
 // Future additions will include:
 // pub use crate::interval::Interval;
