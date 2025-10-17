@@ -19,6 +19,10 @@ pub use crate::degree_alteration::DegreeAlteration;
 pub use crate::formula_degree::FormulaDegree;
 pub use crate::note::Note;
 pub use crate::octave::Octave;
+pub use crate::pitch_class::{
+    PitchClass, C, C_SHARP, D_FLAT, D, D_SHARP, E_FLAT, E, F, F_SHARP, G_FLAT, G, G_SHARP,
+    A_FLAT, A, A_SHARP, B_FLAT, B,
+};
 pub use crate::scale_formula::ScaleFormula;
 pub use crate::semitone::{Semitone, SEMITONES_IN_OCTAVE};
 

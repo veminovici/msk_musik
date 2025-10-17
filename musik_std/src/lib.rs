@@ -12,6 +12,7 @@
 //! - **Semitone**: Basic musical interval representation
 //! - **Note**: Musical note abstraction containing semitone information
 //! - **Octave**: Musical octave position representation
+//! - **PitchClass**: Representation of the 12 chromatic pitch classes (C, C#, D, etc.)
 //! - **DegreeAlteration**: Musical alterations (sharp/flat) for degree modifications
 //! - **FormulaDegree**: Extended harmony degrees for chord construction (9ths, 11ths, 13ths, alterations)
 //! - **ChordFormula**: Bit-packed chord degree representation for efficient chord storage and analysis
@@ -35,6 +36,12 @@
 //! let semitone = Semitone::from(7u8);
 //! let value: u8 = semitone.into();
 //! assert_eq!(value, 7);
+//!
+//! // Pitch classes for chromatic representation
+//! let c = C;
+//! let g = c + 7; // Perfect fifth
+//! assert_eq!(g, G);
+//! assert_eq!(format!("{}", g), "G");
 //!
 //! // Extended harmony with FormulaDegree
 //! let ninth = FormulaDegree::natural(9);
@@ -97,6 +104,7 @@ mod degree_alteration;
 mod formula_degree;
 mod note;
 mod octave;
+mod pitch_class;
 pub mod prelude;
 mod scale_formula;
 mod semitone;
@@ -107,6 +115,10 @@ pub use degree_alteration::DegreeAlteration;
 pub use formula_degree::FormulaDegree;
 pub use note::Note;
 pub use octave::Octave;
+pub use pitch_class::{
+    PitchClass, C, C_SHARP, D_FLAT, D, D_SHARP, E_FLAT, E, F, F_SHARP, G_FLAT, G, G_SHARP,
+    A_FLAT, A, A_SHARP, B_FLAT, B,
+};
 pub use scale_formula::ScaleFormula;
 pub use semitone::{Semitone, SEMITONES_IN_OCTAVE};
 
