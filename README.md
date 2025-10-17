@@ -1,5 +1,9 @@
 # msk_musik
 
+[![CI](https://github.com/yourusername/msk_musik/workflows/CI/badge.svg)](https://github.com/yourusername/msk_musik/actions)
+[![Security](https://github.com/yourusername/msk_musik/workflows/Security%20and%20Dependencies/badge.svg)](https://github.com/yourusername/msk_musik/actions)
+[![Documentation](https://github.com/yourusername/msk_musik/workflows/Documentation/badge.svg)](https://github.com/yourusername/msk_musik/actions)
+
 A Rust workspace containing the `musik_std` library for music processing and audio applications.
 
 ## Overview

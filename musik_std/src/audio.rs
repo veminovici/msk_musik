@@ -9,7 +9,7 @@ pub type Sample = f32;
 /// Common sample rates
 pub mod sample_rates {
     use super::SampleRate;
-    
+
     pub const CD_QUALITY: SampleRate = 44100;
     pub const DVD_QUALITY: SampleRate = 48000;
     pub const HIGH_DEFINITION: SampleRate = 96000;
@@ -93,13 +93,13 @@ pub fn generate_sine_wave(
 ) -> Vec<Sample> {
     let num_samples = (duration_secs * sample_rate as f64) as usize;
     let mut samples = Vec::with_capacity(num_samples);
-    
+
     for i in 0..num_samples {
         let t = i as f64 / sample_rate as f64;
         let sample = amplitude * (2.0 * std::f64::consts::PI * frequency * t).sin() as Sample;
         samples.push(sample);
     }
-    
+
     samples
 }
 
@@ -120,7 +120,7 @@ mod tests {
         let mut buffer = AudioBuffer::new(44100, 1);
         let samples = vec![0.1, 0.2, 0.3];
         buffer.push_samples(&samples);
-        
+
         assert_eq!(buffer.frames(), 3);
         assert_eq!(buffer.samples(), &[0.1, 0.2, 0.3]);
     }
@@ -137,7 +137,7 @@ mod tests {
     fn test_duration_calculation() {
         let mut buffer = AudioBuffer::new(44100, 1);
         buffer.push_samples(&vec![0.0; 44100]); // 1 second of samples
-        
+
         assert!((buffer.duration_secs() - 1.0).abs() < 0.001);
     }
 }
