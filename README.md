@@ -4,34 +4,44 @@
 [![Security](https://github.com/veminovici/msk_musik/workflows/Security%20and%20Dependencies/badge.svg)](https://github.com/veminovici/msk_musik/actions)
 [![Documentation](https://github.com/veminovici/msk_musik/workflows/Documentation/badge.svg)](https://github.com/veminovici/msk_musik/actions)
 
-A Rust workspace containing the `musik_theory` library for music processing and audio applications.
+A Rust workspace containing the `musik_std` library for comprehensive music theory processing and applications.
 
 ## Overview
 
-This workspace provides a comprehensive set of tools for music theory, audio processing, and MIDI handling in Rust. The core library `musik_theory` offers fundamental building blocks for music-related applications.
+This workspace provides a robust foundation for music theory applications in Rust. The core library `musik_std` offers essential building blocks including notes, scales, chords, pitch classes, semitones, and musical intervals with a focus on type safety and performance.
 
 ## Workspace Structure
 
 ```
 msk_musik/
 ├── Cargo.toml          # Workspace configuration
-├── musik_theory/       # Core music library
+├── musik_std/          # Core music theory library
 │   ├── Cargo.toml      # Library configuration
+│   ├── examples/       # Usage examples
 │   └── src/
-│       ├── lib.rs      # Library root
-│       ├── theory.rs   # Music theory primitives
-│       ├── audio.rs    # Audio processing utilities
-│       └── midi.rs     # MIDI support
+│       ├── lib.rs      # Library root and exports
+│       ├── prelude.rs  # Common imports
+│       ├── note.rs     # MIDI notes and operations
+│       ├── semitone.rs # Semitone representations
+│       ├── octave.rs   # Octave handling
+│       ├── pitch_class.rs # Pitch class system
+│       ├── degree_alteration.rs # Sharp/flat alterations
+│       ├── formula_degree.rs    # Formula degrees (1st, 3rd, etc.)
+│       ├── chord_formula.rs     # Chord construction
+│       └── scale_formula.rs     # Scale patterns
+├── scripts/            # Development and CI scripts
 └── README.md           # This file
 ```
 
 ## Features
 
-### musik_theory Library
+### musik_std Library
 
-- **Music Theory**: Notes, intervals, scales, and chord progressions
-- **Audio Processing**: Sample buffers, waveform generation, and audio utilities
-- **MIDI Support**: MIDI message handling, note/frequency conversion, and protocol utilities
+- **Core Music Theory**: Notes (MIDI 0-255), pitch classes (C, C#, D, etc.), semitones, and octaves
+- **Scales and Modes**: Major, minor, pentatonic, blues, and custom scale formulas
+- **Chord Theory**: Triads, seventh chords, extensions, alterations, and complex jazz harmonies
+- **Type Safety**: Compile-time guarantees and const functions for performance
+- **Rich API**: Comprehensive methods for musical calculations and transformations
 
 ## Getting Started
 
@@ -60,7 +70,7 @@ cargo test
 cargo test -- --nocapture
 
 # Run tests for specific package
-cargo test -p musik_theory
+cargo test -p musik_std
 ```
 
 ### Code Quality
@@ -108,22 +118,33 @@ Commits will be **automatically blocked** if any check fails, ensuring only CI-p
 ## Usage Example
 
 ```rust
-use musik_theory::{Note, midi, audio};
+use musik_std::prelude::*;
 
 fn main() {
     // Work with musical notes
-    let note = Note::A;
-    println!("Note: {} (semitone: {})", note, note.semitone());
-
-    // Convert to MIDI
-    if let Some(midi_note) = midi::note_to_midi(note, 4) {
-        let frequency = midi::midi_to_frequency(midi_note);
-        println!("A4 = MIDI {} = {:.2} Hz", midi_note, frequency);
-    }
-
-    // Generate audio
-    let samples = audio::generate_sine_wave(440.0, 1.0, 44100, 0.5);
-    println!("Generated {} samples", samples.len());
+    let middle_c = Note::new(60); // MIDI middle C
+    println!("Note: {} (octave: {})", middle_c, middle_c.octave());
+    
+    // Pitch class operations
+    let pitch_class = middle_c.pitch_class();
+    println!("Pitch class: {} ({})", pitch_class.name(), pitch_class.value());
+    
+    // Scale construction
+    let c_major = ScaleFormula::major();
+    let scale_notes = c_major.notes_from_root(middle_c);
+    println!("C Major scale: {:?}", scale_notes);
+    
+    // Chord construction
+    let major_triad = ChordFormula::new()
+        .with_degree(FormulaDegree::natural(1))
+        .with_degree(FormulaDegree::natural(3))
+        .with_degree(FormulaDegree::natural(5));
+    println!("Major triad formula: {}", major_triad);
+    
+    // Semitone operations
+    let semitone = Semitone::new(7); // Perfect fifth
+    let fifth_above = middle_c + semitone;
+    println!("Fifth above C4: {}", fifth_above);
 }
 ```
 
@@ -131,10 +152,10 @@ fn main() {
 
 ### Adding New Features
 
-1. Create new modules in `musik_theory/src/`
+1. Create new modules in `musik_std/src/`
 2. Export them in `lib.rs`
-3. Add comprehensive tests
-4. Update documentation
+3. Add comprehensive tests and documentation examples
+4. Update the prelude if needed for common usage
 
 ### Testing
 
@@ -166,9 +187,13 @@ This project is licensed under the MIT OR Apache-2.0 license.
 
 ## Roadmap
 
-- [ ] Extended chord progressions and scales
-- [ ] Audio effects processing
-- [ ] Real-time audio I/O
-- [ ] Advanced MIDI sequencing
-- [ ] Music notation support
-- [ ] Audio file format support
+- [x] Core music theory primitives (notes, semitones, octaves)
+- [x] Pitch class system with ergonomic constants
+- [x] Scale and chord formula systems
+- [x] Comprehensive test coverage (120+ tests)
+- [ ] Interval calculations and inversions  
+- [ ] Circle of fifths utilities
+- [ ] Key signature support
+- [ ] Extended jazz chord notations
+- [ ] MIDI file parsing and generation
+- [ ] Audio synthesis integration
