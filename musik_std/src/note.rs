@@ -1,7 +1,7 @@
 //! Note implementation for musical notes.
 
 use crate::semitone::Semitone;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Shl, Shr, Sub};
 
 /// A musical note represented by its semitone offset from C.
 ///
@@ -190,6 +190,60 @@ impl Sub<Semitone> for Note {
     /// ```
     fn sub(self, rhs: Semitone) -> Self::Output {
         Note::new(self.0.saturating_sub(u8::from(rhs)))
+    }
+}
+
+impl Shr<u8> for Note {
+    type Output = Note;
+
+    /// Shifts a `Note` upward by the given number of octaves.
+    ///
+    /// This operation transposes the note upward by N octaves, where each octave
+    /// is 12 semitones. The result uses saturating addition to prevent overflow.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Note;
+    ///
+    /// let middle_c = Note::new(60);    // Middle C (MIDI 60)
+    /// let high_c = middle_c >> 1u8;    // Up 1 octave → C7 (MIDI 72)
+    /// assert_eq!(high_c.semitone(), 72);
+    ///
+    /// let c = Note::new(0);            // C0
+    /// let c_two_octaves_up = c >> 2u8; // Up 2 octaves → C2 (MIDI 24)
+    /// assert_eq!(c_two_octaves_up.semitone(), 24);
+    /// ```
+    fn shr(self, rhs: u8) -> Self::Output {
+        let octave_shift = rhs.saturating_mul(12);
+        Note::new(self.0.saturating_add(octave_shift))
+    }
+}
+
+impl Shl<u8> for Note {
+    type Output = Note;
+
+    /// Shifts a `Note` downward by the given number of octaves.
+    ///
+    /// This operation transposes the note downward by N octaves, where each octave
+    /// is 12 semitones. The result uses saturating subtraction to prevent underflow.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use musik_std::Note;
+    ///
+    /// let high_c = Note::new(72);      // C7 (MIDI 72)
+    /// let middle_c = high_c << 1u8;    // Down 1 octave → C6 (MIDI 60)
+    /// assert_eq!(middle_c.semitone(), 60);
+    ///
+    /// let c = Note::new(24);           // C2 (MIDI 24)
+    /// let low_c = c << 2u8;            // Down 2 octaves → C0 (MIDI 0)
+    /// assert_eq!(low_c.semitone(), 0);
+    /// ```
+    fn shl(self, rhs: u8) -> Self::Output {
+        let octave_shift = rhs.saturating_mul(12);
+        Note::new(self.0.saturating_sub(octave_shift))
     }
 }
 
@@ -417,5 +471,167 @@ mod tests {
             // Subtracting zero should return the same note
             assert_eq!((note - zero_semitones).semitone(), note_value);
         }
+    }
+
+    #[test]
+    fn test_note_shr_octave_shift() {
+        let middle_c = Note::new(60); // Middle C (MIDI 60)
+        let high_c = middle_c >> 1u8; // Up 1 octave
+        assert_eq!(high_c.semitone(), 72);
+
+        let c0 = Note::new(0); // C0
+        let c2 = c0 >> 2u8; // Up 2 octaves
+        assert_eq!(c2.semitone(), 24);
+
+        let note = Note::new(36); // C3
+        let shifted = note >> 3u8; // Up 3 octaves
+        assert_eq!(shifted.semitone(), 72); // C6
+    }
+
+    #[test]
+    fn test_note_shl_octave_shift() {
+        let high_c = Note::new(72); // C6 (MIDI 72)
+        let middle_c = high_c << 1u8; // Down 1 octave
+        assert_eq!(middle_c.semitone(), 60);
+
+        let c2 = Note::new(24); // C2
+        let c0 = c2 << 2u8; // Down 2 octaves
+        assert_eq!(c0.semitone(), 0);
+
+        let note = Note::new(60); // Middle C
+        let shifted = note << 3u8; // Down 3 octaves (should go to 60 - 36 = 24)
+        assert_eq!(shifted.semitone(), 24); // C2
+    }
+
+    #[test]
+    fn test_note_shr_shl_saturation() {
+        // Test upward saturation (Shr)
+        let high_note = Note::new(250);
+        let shifted_up = high_note >> 1u8;
+        assert_eq!(shifted_up.semitone(), 255); // Should saturate at u8::MAX
+
+        let very_high = Note::new(240);
+        let max_shift = very_high >> 10u8; // Large shift
+        assert_eq!(max_shift.semitone(), 255); // Should saturate
+
+        // Test downward saturation (Shl)
+        let low_note = Note::new(5);
+        let shifted_down = low_note << 1u8; // 5 - 12 should saturate at 0
+        assert_eq!(shifted_down.semitone(), 0);
+
+        let c1 = Note::new(12);
+        let over_shift = c1 << 5u8; // 12 - 60 should saturate at 0
+        assert_eq!(over_shift.semitone(), 0);
+    }
+
+    #[test]
+    fn test_note_shr_shl_musical_examples() {
+        // Vocal range examples
+        let soprano_c = Note::new(72); // C6 - high soprano note
+        let alto_c = soprano_c << 1u8; // Down to C5
+        let tenor_c = alto_c << 1u8; // Down to C4
+        let bass_c = tenor_c << 1u8; // Down to C3
+
+        assert_eq!(alto_c.semitone(), 60); // C5
+        assert_eq!(tenor_c.semitone(), 48); // C4
+        assert_eq!(bass_c.semitone(), 36); // C3
+
+        // Piano range examples
+        let middle_c = Note::new(60); // Middle C
+        let low_c = middle_c << 2u8; // Down 2 octaves
+        let high_c = middle_c >> 2u8; // Up 2 octaves
+
+        assert_eq!(low_c.semitone(), 36); // C3
+        assert_eq!(high_c.semitone(), 84); // C7
+
+        // Chord inversions across octaves
+        let c_major_root = Note::new(60); // C4
+        let c_major_first_inv = c_major_root >> 1u8; // C5 (bass note moved up)
+        assert_eq!(c_major_first_inv.semitone(), 72);
+    }
+
+    #[test]
+    fn test_note_shr_shl_symmetry() {
+        let test_notes = [12, 24, 36, 48, 60, 72, 84, 96];
+
+        for &note_value in &test_notes {
+            let note = Note::new(note_value);
+
+            // Test 1-octave symmetry (within safe ranges)
+            // For upward then downward: note should be >= 12 and <= 243 to stay in bounds
+            if (12..=243).contains(&note_value) {
+                let up_then_down = (note >> 1u8) << 1u8;
+                assert_eq!(up_then_down.semitone(), note_value);
+            }
+
+            // For downward then upward: note should be >= 12 and result should not overflow
+            if (12..=243).contains(&note_value) {
+                let down_then_up = (note << 1u8) >> 1u8;
+                assert_eq!(down_then_up.semitone(), note_value);
+            }
+
+            // Test 2-octave symmetry (within safe ranges)
+            if (24..=231).contains(&note_value) {
+                let up_then_down_2 = (note >> 2u8) << 2u8;
+                assert_eq!(up_then_down_2.semitone(), note_value);
+
+                let down_then_up_2 = (note << 2u8) >> 2u8;
+                assert_eq!(down_then_up_2.semitone(), note_value);
+            }
+        }
+    }
+
+    #[test]
+    fn test_note_shr_shl_zero_operations() {
+        let test_notes = [0, 12, 36, 60, 84, 127];
+
+        for &note_value in &test_notes {
+            let note = Note::new(note_value);
+
+            // Shifting by 0 octaves should return the same note
+            assert_eq!((note >> 0u8).semitone(), note_value);
+            assert_eq!((note << 0u8).semitone(), note_value);
+        }
+    }
+
+    #[test]
+    fn test_note_shr_shl_chromatic_operations() {
+        // Test that pitch class is preserved across octave shifts
+        let chromatic_notes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+        for &pitch_class in &chromatic_notes {
+            let note = Note::new(pitch_class + 48); // Start at octave 4
+
+            // Shift up then down should preserve pitch class (within safe ranges)
+            let shifted = (note >> 1u8) << 1u8;
+            assert_eq!(shifted.semitone() % 12, pitch_class);
+
+            // Shift down then up should preserve pitch class
+            let note_high = Note::new(pitch_class + 60); // Start higher for safe downward shift
+            let shifted_2 = (note_high << 1u8) >> 1u8;
+            assert_eq!(shifted_2.semitone() % 12, pitch_class);
+        }
+    }
+
+    #[test]
+    fn test_note_shr_shl_boundary_cases() {
+        // Test at the boundaries of u8 range
+        let min_note = Note::new(0);
+        let max_note = Note::new(255);
+
+        // Shifting min note down should stay at 0
+        assert_eq!((min_note << 1u8).semitone(), 0);
+        assert_eq!((min_note << 10u8).semitone(), 0);
+
+        // Shifting max note up should stay at 255
+        assert_eq!((max_note >> 1u8).semitone(), 255);
+        assert_eq!((max_note >> 10u8).semitone(), 255);
+
+        // Test near boundaries
+        let near_min = Note::new(11);
+        assert_eq!((near_min << 1u8).semitone(), 0); // 11 - 12 = saturates to 0
+
+        let near_max = Note::new(244);
+        assert_eq!((near_max >> 1u8).semitone(), 255); // 244 + 12 = saturates to 255
     }
 }
