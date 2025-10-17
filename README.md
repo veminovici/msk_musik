@@ -97,6 +97,7 @@ make help
 ```
 
 **Pre-commit validation includes:**
+
 - Code formatting (`cargo fmt`)
 - Clippy lints with warnings as errors
 - Full workspace build
